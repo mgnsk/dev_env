@@ -15,7 +15,6 @@ RUN pacman-key --init \
 	git \
 	neovim
 
-# TODO not tested on other systems.
 RUN useradd -m ${user} && usermod -aG wheel ${user} \
 	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers \
 	&& echo "Defaults:${user} !authenticate" >> /etc/sudoers \
