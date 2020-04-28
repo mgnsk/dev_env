@@ -11,5 +11,5 @@ createVolume "dev_env_nvim"
 
 mkdir -p ./code
 
-podman run -it -v dev_env_go:/home/$USER/go -v dev_env_nvim:/home/$USER/.config/nvim --rm -h dev_env dev_env /bin/bash
+podman run -it -v ./code:/code -v dev_env_go:/home/$USER/go -v dev_env_nvim:/home/$USER/.config/nvim --rm -h dev_env dev_env /bin/bash
 
