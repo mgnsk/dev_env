@@ -1,23 +1,23 @@
 FROM archlinux
 
-ARG user
-
-ENV USER=${user}
-
 RUN pacman-key --init \
 	&& pacman-key --populate archlinux \
 	&& pacman -Syu --noconfirm \
 	&& pacman -S --noconfirm \
 	base-devel \
+	openssh \
+	git
+
+RUN pacman -S --noconfirm \
 	ctags \
 	chezmoi \
 	go \
-	rust \
+	rustup \
 	nodejs \
 	npm \
-	git \
-	openssh \
 	neovim
+
+ARG user
 
 RUN useradd -m ${user} && usermod -aG wheel ${user} \
 	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers \
@@ -29,6 +29,9 @@ RUN useradd -m ${user} && usermod -aG wheel ${user} \
 
 USER $user
 
+RUN rustup self upgrade-data \
+	&& rustup update stable
+
 RUN mkdir -p /tmp/direnv \
 	&& cd /tmp/direnv \
 	&& git clone https://aur.archlinux.org/direnv.git . \
@@ -37,8 +40,19 @@ RUN mkdir -p /tmp/direnv \
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
 	&& git clone https://github.com/mgnsk/dotfiles.git . \
-	&& git checkout 831d97d \
+	&& git checkout 576c122 \
 	&& chezmoi apply
+
+RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
+	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+# This installs the go toolchain.
+RUN nvim --headless -c 'PlugInstall --sync|qa'
+
+# When opening a cargo project, the plugin will ask to install rls toolchain.
+RUN nvim --headless -c 'CocInstall -sync coc-rls|qa'
+
+ENV USER=${user}
 
 WORKDIR /code
 
