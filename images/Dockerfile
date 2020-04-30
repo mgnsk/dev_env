@@ -41,11 +41,14 @@ RUN mkdir -p /tmp/direnv \
 	&& git clone https://aur.archlinux.org/direnv.git . \
 	&& makepkg -si --noconfirm
 
+ARG dot_commit
+
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
 	&& git clone https://github.com/mgnsk/dotfiles.git . \
-	&& git checkout 40dd23f \
-	&& chezmoi apply
+	&& git checkout ${dot_commit} \
+	&& chezmoi apply \
+	&& rm -rf ~/.local/share/chezmoi
 
 RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
