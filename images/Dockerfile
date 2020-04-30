@@ -11,9 +11,11 @@ RUN pacman-key --init \
 RUN pacman -S --noconfirm \
 	ctags \
 	fzf \
+	ripgrep \
 	chezmoi \
 	go \
 	rustup \
+	python \
 	nodejs \
 	npm \
 	neovim
@@ -54,10 +56,9 @@ RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Install go toolchain.
-RUN nvim --headless -c 'PlugInstall --sync|qa' 
-
-# Install rust language server plugin.
-RUN nvim --headless -c 'CocInstall -sync coc-rls|qa' 
+RUN nvim --headless -c 'PlugInstall --sync|qa' \
+	# Install rust language server plugin.
+	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
 
 ENV USER=${user}
 
