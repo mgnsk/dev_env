@@ -11,5 +11,14 @@ createVolume "dev_env_nvim"
 
 mkdir -p ./code
 
-docker run -it -v "$(pwd)/code:/code" -v "dev_env_go:/home/$USER/go" -v "dev_env_nvim:/home/$USER/.config/nvim" --rm -h dev_env dev_env /bin/bash
+docker run \
+	-it \
+	-h dev_env \
+	--mount source=dev_env_go,target=/home/$USER/go \
+	--mount source=dev_env_nvim,target=/home/$USER/.config/nvim \
+	--mount type=bind,source=$(pwd)/code,target=/code \
+	--mount type=bind,source=/home/$USER/.ssh,target=/home/$USER/.ssh \
+	--rm \
+	dev_env \
+	/bin/bash
 
