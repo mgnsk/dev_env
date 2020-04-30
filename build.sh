@@ -4,6 +4,6 @@ cd images
 
 docker build \
 	--build-arg=user=$USER \
-	--build-arg=dot_commit=f206e22 \
+	--build-arg=dot_commit=23fc48c \
 	-t dev_env .
 
