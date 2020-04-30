@@ -10,12 +10,15 @@ RUN pacman-key --init \
 
 RUN pacman -S --noconfirm \
 	ctags \
+	fzf \
 	chezmoi \
 	go \
 	rustup \
 	nodejs \
 	npm \
 	neovim
+
+RUN bash -c "yes | pacman -Scc"
 
 ARG user
 
@@ -30,7 +33,8 @@ RUN useradd -m ${user} && usermod -aG wheel ${user} \
 USER $user
 
 RUN rustup self upgrade-data \
-	&& rustup update stable
+	&& rustup update stable \
+	&& rustup component add rls rust-analysis rust-src
 
 RUN mkdir -p /tmp/direnv \
 	&& cd /tmp/direnv \
@@ -40,19 +44,21 @@ RUN mkdir -p /tmp/direnv \
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
 	&& git clone https://github.com/mgnsk/dotfiles.git . \
-	&& git checkout 576c122 \
+	&& git checkout 40dd23f \
 	&& chezmoi apply
 
 RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-# This installs the go toolchain.
-RUN nvim --headless -c 'PlugInstall --sync|qa'
+# Install go toolchain.
+RUN nvim --headless -c 'PlugInstall --sync|qa' 
 
-# When opening a cargo project, the plugin will ask to install rls toolchain.
-RUN nvim --headless -c 'CocInstall -sync coc-rls|qa'
+# Install rust language server plugin.
+RUN nvim --headless -c 'CocInstall -sync coc-rls|qa' 
 
 ENV USER=${user}
+
+SHELL ["/bin/bash"]
 
 WORKDIR /code
 
