@@ -1,22 +1,16 @@
 # Base system.
-FROM archlinux AS base
+FROM archlinux AS system-base
 
 RUN pacman-key --init \
 	&& pacman-key --populate archlinux \
 	&& pacman -Syu --noconfirm \
-	&& pacman -S --noconfirm \
-	base-devel \
+	&& pacman -S --noconfirm base-devel
+
+RUN pacman -S --noconfirm \
+	git \
 	openssh \
 	neovim \
-	git \
-	ctags \
-	fzf \
-	ripgrep \
-	chezmoi \
 	go \
-	python \
-	nodejs \
-	npm \
 	rustup \
 	&& bash -c "yes | pacman -Scc"
 
@@ -32,17 +26,19 @@ RUN useradd -m ${user} && usermod -aG wheel ${user} \
 
 USER ${user}
 
+ENV USER=${user}
 
-# Rust.
-FROM base AS rust
+
+# Rust installation.
+FROM system-base AS rust
 
 RUN rustup self upgrade-data \
 	&& rustup update stable \
 	&& rustup component add rls rust-analysis rust-src
 
 
-# Direnv.
-FROM base as direnv
+# Direnv installation.
+FROM system-base as direnv
 
 RUN mkdir -p /tmp/direnv \
 	&& cd /tmp/direnv \
@@ -50,8 +46,21 @@ RUN mkdir -p /tmp/direnv \
 	&& makepkg -si --noconfirm
 
 
-# Dotfiles and plugins.
-FROM base AS homedir
+# System packages.
+FROM system-base AS dev-pkgs
+
+RUN sudo pacman -S --noconfirm \
+	chezmoi \
+	ctags \
+	fzf \
+	ripgrep \
+	python \
+	nodejs \
+	npm \
+	&& bash -c "yes | sudo pacman -Scc"
+
+# Development tools.
+FROM dev-pkgs AS tools
 
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
@@ -70,19 +79,16 @@ RUN nvim --headless -c 'PlugInstall --sync|qa' \
 	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
 
 
-# The final image.
-FROM scratch as dev-env
+# Development image.
+FROM dev-pkgs as dev-env
 
 ARG user
 
-COPY --from=base / /
-COPY --from=homedir /home /home
+COPY --from=tools /home /home
 COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 COPY --from=rust /home/${user}/.rustup /home/${user}/.rustup
 
-USER ${user}
-
-ENV USER=${user}
+ENV USER ${user}
 
 SHELL ["/bin/bash"]
 
