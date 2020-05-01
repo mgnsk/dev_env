@@ -63,6 +63,10 @@ RUN sudo pacman -S --noconfirm \
 # Development tools.
 FROM dev-pkgs AS tools
 
+ARG user
+
+ARG dot_commit
+
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
 	&& git clone https://github.com/mgnsk/dotfiles.git . \
@@ -72,12 +76,16 @@ RUN mkdir -p ~/.local/share/chezmoi \
 
 # Install vim-plug.
 RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
-	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-# Install go toolchain.
-RUN nvim --headless -c 'PlugInstall --sync|qa' \
+	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
+	# Install go toolchain.
+	&& nvim --headless -c 'PlugInstall --sync|qa' \
 	# Install rust language server plugin.
-	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
+	&& nvim --headless -c 'CocInstall -sync coc-rls|qa' \
+	&& mv ~/go/gopls ~/go/gopls-orig
+
+COPY --chown=${user}:${user} ./gopls /home/${user}/go/gopls
+
+RUN chmod +x ~/go/gopls
 
 
 # Development image.
@@ -89,11 +97,7 @@ COPY --from=tools /home /home
 COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 COPY --from=rust /home/${user}/.rustup /home/${user}/.rustup
 
-COPY --chown=${user}:${user} ./gopls /gopls
-RUN chmod +x /gopls
-
 ENV USER ${user}
-ENV GOPLS_COMMAND /gopls
 
 SHELL ["/bin/bash"]
 
