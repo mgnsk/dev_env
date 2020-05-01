@@ -79,14 +79,8 @@ RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	# Install go toolchain.
 	&& nvim --headless -c 'PlugInstall --sync|qa' \
-	&& mv ~/go/gopls ~/go/gopls-orig \
 	# Install rust language server plugin.
 	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
-
-# Install gopls autorestart wrapper.
-COPY --chown=${user}:${user} ./gopls /home/${user}/go/gopls
-
-RUN chmod +x ~/go/gopls
 
 
 # Development image.
