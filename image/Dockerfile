@@ -89,7 +89,11 @@ COPY --from=tools /home /home
 COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 COPY --from=rust /home/${user}/.rustup /home/${user}/.rustup
 
+COPY --chown=${user}:${user} ./gopls /gopls
+RUN chmod +x /gopls
+
 ENV USER ${user}
+ENV GOPLS_COMMAND /gopls
 
 SHELL ["/bin/bash"]
 

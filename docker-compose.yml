@@ -1,0 +1,22 @@
+version: "2.4"
+
+services:
+  dev-env:
+    image: dev-env:sandbox
+    hostname: dev-env
+    #cpus: 2.0
+    mem_limit: 2G
+    mem_reservation: 1G
+    mem_swappiness: 0
+    build:
+      context: ./image
+      target: dev-env
+      args:
+      - user
+      - dot_commit
+    volumes:
+    - ./code:/code
+    - $HOME/.ssh:$HOME/.ssh
+    stdin_open: yes
+    tty: yes
+

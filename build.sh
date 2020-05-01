@@ -1,11 +1,7 @@
 #!/bin/bash
 
-cd images
-
-docker build \
-	--build-arg=user=$(id -un) \
-	--build-arg=dot_commit=5f0ea2616bd35291d8636f8f1381fee4a992a915 \
-	-t $1 \
-	--target $1 \
-	.
+docker-compose build \
+	--build-arg user=$USER \
+	--build-arg dot_commit=8bca1ebcb9da2ff19ea6d4cde8434b37a1bd6830 \
+	dev-env
 

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+until $HOME/go/gopls "$@"; do
+    echo "'gopls' crashed with exit code $?.  Restarting.." >&2
+    sleep 1
+done
+
