@@ -60,10 +60,14 @@ RUN sudo pacman -S --noconfirm \
 	&& bash -c "yes | sudo pacman -Scc"
 
 
-# Development tools.
-FROM dev-pkgs AS tools
+# Development image.
+FROM dev-pkgs as dev-env
 
 ARG user
+
+COPY --from=rust /home/${user}/.rustup /home/${user}/.rustup
+
+COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 
 ARG dot_commit
 
@@ -73,24 +77,6 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& git checkout ${dot_commit} \
 	&& chezmoi apply \
 	&& rm -rf ~/.local/share/chezmoi
-
-# Install vim-plug.
-RUN curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
-	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	# Install go toolchain.
-	&& nvim --headless -c 'PlugInstall --sync|qa' \
-	# Install rust language server plugin.
-	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
-
-
-# Development image.
-FROM dev-pkgs as dev-env
-
-ARG user
-
-COPY --from=tools /home /home
-COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
-COPY --from=rust /home/${user}/.rustup /home/${user}/.rustup
 
 ENV USER ${user}
 
