@@ -59,6 +59,7 @@ RUN sudo pacman -S --noconfirm \
 	npm \
 	&& bash -c "yes | sudo pacman -Scc"
 
+
 # Development tools.
 FROM dev-pkgs AS tools
 
