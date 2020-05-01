@@ -2,7 +2,7 @@
 
 docker-compose build \
 	--build-arg user=$USER \
-	--build-arg dot_commit=d31b8b93ecb48ef2b5183c284be9a28c668838b0 \
+	--build-arg dot_commit=e15ec0b132a46f24034a23eb06a4aa4e600640a4 \
 	--force-rm \
 	"$@"
 
