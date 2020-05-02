@@ -5,41 +5,28 @@ RUN pacman-key --init \
 	&& pacman-key --populate archlinux \
 	&& pacman -Syu --noconfirm
 
-RUN pacman -S --noconfirm \
+RUN pacman -S --needed --noconfirm \
 	base-devel \
 	earlyoom \
+	chezmoi \
 	git \
-	openssh \
-	neovim \
 	go \
 	rustup \
-	&& bash -c "yes | pacman -Scc"
+	&& rm -rf /var/cache/pacman/pkg
 
 ARG user
 
-RUN useradd -m ${user} && usermod -aG wheel ${user} \
+RUN useradd -m -G wheel -s /bin/bash ${user} \
 	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers \
-	&& echo "Defaults:${user} !authenticate" >> /etc/sudoers \
-	&& mkdir /code \
-	&& chown -R ${user}:${user} /code \
-	&& mkdir -p /home/${user}/go \
-	&& chown -R ${user}:${user} /home/${user}/go
-
-USER ${user}
-
-ENV USER=${user}
-
-
-# Rust installation.
-FROM system-base AS rust
-
-RUN rustup self upgrade-data \
-	&& rustup update stable \
-	&& rustup component add rls rust-analysis rust-src
+	&& echo "Defaults:${user} !authenticate" >> /etc/sudoers
 
 
 # Direnv installation.
-FROM system-base as direnv
+FROM system-base AS direnv
+
+ARG user
+
+USER ${user}
 
 RUN mkdir -p /tmp/direnv \
 	&& cd /tmp/direnv \
@@ -47,43 +34,67 @@ RUN mkdir -p /tmp/direnv \
 	&& makepkg -si --noconfirm
 
 
-# System packages.
+# User packages.
 FROM system-base AS dev-pkgs
 
-RUN sudo pacman -S --noconfirm \
-	chezmoi \
+RUN pacman -S --needed --noconfirm \
+	neovim \
 	ctags \
 	fzf \
 	ripgrep \
 	python \
 	nodejs \
 	npm \
-	&& bash -c "yes | sudo pacman -Scc"
+	&& rm -rf /var/cache/pacman/pkg
 
 
-# Development image.
-FROM dev-pkgs as dev-env
+# Rust installation.
+FROM system-base AS rust
 
 ARG user
 
-COPY --from=rust /home/${user}/.rustup /home/${user}/.rustup
+USER ${user}
 
-COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
+RUN rustup self upgrade-data \
+	&& rustup update stable \
+	&& rustup component add rls rust-analysis rust-src
+
+
+# User configuration.
+FROM system-base AS dev-home
+
+ARG user
+
+ARG dot_url
 
 ARG dot_commit
 
+USER ${user}
+
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
-	&& git clone https://github.com/mgnsk/dotfiles.git . \
+	&& git clone ${dot_url} . \
 	&& git checkout ${dot_commit} \
 	&& chezmoi apply \
-	&& rm -rf ~/.local/share/chezmoi
+	&& rm -rf ~/.local/share/chezmoi \
+	&& mkdir -p ~/go ~/code
+
+
+# Development image.
+FROM dev-pkgs AS dev-env
+
+ARG user
+
+COPY --from=dev-home /home/${user} /home/${user}
+COPY --from=rust --chown=${user}:${user} /home/${user}/.rustup /home/${user}/.rustup
+COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
+COPY ./entry.sh /entry.sh
 
 ENV USER ${user}
 
-WORKDIR /code
+USER ${user}
 
-COPY ./entry.sh /entry.sh
+WORKDIR /home/${user}/code
 
 ENTRYPOINT ["/entry.sh"]
 

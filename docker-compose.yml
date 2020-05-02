@@ -9,11 +9,10 @@ services:
   dev-env:
     image: dev-env:sandbox
     hostname: dev-env
-    # The container must get all host resources for earlyoom to work.
     #cpus: 2.0
-    #mem_limit: 2G
-    #mem_reservation: 1G
-    #memswap_limit: 0
+    mem_limit: 2G
+    mem_reservation: 1G
+    memswap_limit: 4G
     #mem_swappiness: 0
     build:
       context: ./image
@@ -22,10 +21,9 @@ services:
       - user
       - dot_commit
     volumes:
-    - "./code:/code"
-    - "$HOME/.ssh:$HOME/.ssh"
-    - "gopath:$HOME/go"
-    - "nvim:$HOME/.config/nvim"
+    - ./code:/home/${USER}/code
+    - gopath:/home/${USER}/go
+    - nvim:/home/${USER}/.config/nvim
     stdin_open: yes
     tty: yes
     environment:
