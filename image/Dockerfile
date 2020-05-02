@@ -3,10 +3,11 @@ FROM archlinux AS system-base
 
 RUN pacman-key --init \
 	&& pacman-key --populate archlinux \
-	&& pacman -Syu --noconfirm \
-	&& pacman -S --noconfirm base-devel
+	&& pacman -Syu --noconfirm
 
 RUN pacman -S --noconfirm \
+	base-devel \
+	earlyoom \
 	git \
 	openssh \
 	neovim \
@@ -80,7 +81,9 @@ RUN mkdir -p ~/.local/share/chezmoi \
 
 ENV USER ${user}
 
-SHELL ["/bin/bash"]
-
 WORKDIR /code
+
+COPY ./entry.sh /entry.sh
+
+ENTRYPOINT ["/entry.sh"]
 

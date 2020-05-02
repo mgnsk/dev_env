@@ -9,10 +9,11 @@ services:
   dev-env:
     image: dev-env:sandbox
     hostname: dev-env
+    # The container must get all host resources for earlyoom to work.
     #cpus: 2.0
-    mem_limit: 2G
-    mem_reservation: 1G
-    memswap_limit: 3G
+    #mem_limit: 2G
+    #mem_reservation: 1G
+    #memswap_limit: 0
     #mem_swappiness: 0
     build:
       context: ./image
