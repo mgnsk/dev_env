@@ -10,6 +10,7 @@ RUN pacman -S --needed --noconfirm \
 	earlyoom \
 	chezmoi \
 	git \
+	vim \
 	go \
 	rustup \
 	&& rm -rf /var/cache/pacman/pkg
@@ -38,7 +39,6 @@ RUN mkdir -p /tmp/direnv \
 FROM system-base AS dev-pkgs
 
 RUN pacman -S --needed --noconfirm \
-	neovim \
 	ctags \
 	fzf \
 	ripgrep \
@@ -61,7 +61,7 @@ RUN rustup self upgrade-data \
 
 
 # User configuration.
-FROM system-base AS dev-home
+FROM dev-pkgs AS dev-home
 
 ARG user
 
@@ -77,7 +77,12 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& git checkout ${dot_commit} \
 	&& chezmoi apply \
 	&& rm -rf ~/.local/share/chezmoi \
-	&& mkdir -p ~/go ~/code
+	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
+	&& cd ~ \
+	&& vim -c 'PlugInstall --sync|qa' \
+	&& vim -c 'CocInstall -sync coc-rls|qa' \
+	&& mkdir -p ~/code
 
 
 # Development image.

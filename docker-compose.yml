@@ -1,10 +1,5 @@
 version: "2.4"
 
-volumes:
-  goproxy-cache:
-  gopath:
-  nvim:
-
 services:
   dev-env:
     image: dev-env:sandbox
@@ -23,17 +18,8 @@ services:
       - dot_commit
     volumes:
     - ./code:/home/${USER}/code
-    - gopath:/home/${USER}/go
-    - nvim:/home/${USER}/.config/nvim
     environment:
     - GOPROXY=http://goproxy:8081
     ports:
     - 6060:6060 # gopls debug
-    depends_on:
-    - goproxy
-
-  goproxy:
-    image: goproxy/goproxy:latest
-    volumes:
-    - goproxy-cache:/go
 
