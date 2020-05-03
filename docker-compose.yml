@@ -18,8 +18,6 @@ services:
       - dot_commit
     volumes:
     - ./code:/home/${USER}/code
-    environment:
-    - GOPROXY=http://goproxy:8081
     ports:
     - 6060:6060 # gopls debug
 
