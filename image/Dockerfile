@@ -11,6 +11,7 @@ RUN pacman -S --needed --noconfirm \
 	chezmoi \
 	git \
 	vim \
+	neovim \
 	go \
 	rustup \
 	&& rm -rf /var/cache/pacman/pkg
@@ -74,14 +75,14 @@ USER ${user}
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
 	&& git clone ${dot_url} . \
-	&& git checkout ${dot_commit} \
+	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
 	&& rm -rf ~/.local/share/chezmoi \
-	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+	&& curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& cd ~ \
-	&& vim -c 'PlugInstall --sync|qa' \
-	&& vim -c 'CocInstall -sync coc-rls|qa' \
+	&& nvim --headless -c 'PlugInstall --sync|qa' \
+	&& nvim --headless -c 'CocInstall -sync coc-rls|qa' \
 	&& mkdir -p ~/code
 
 

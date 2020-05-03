@@ -18,6 +18,4 @@ services:
       - dot_commit
     volumes:
     - ./code:/home/${USER}/code
-    ports:
-    - 6060:6060 # gopls debug
 
