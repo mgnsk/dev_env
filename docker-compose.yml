@@ -2,7 +2,7 @@ version: "2.4"
 
 services:
   dev-env:
-    image: dev-env:sandbox
+    image: mgnsk/dev-env:${BUILDTAG}
     hostname: dev-env
     # Use full resources for earlyoom to work correctly.
     #cpus: 2.0

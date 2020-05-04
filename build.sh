@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -euo pipefail
+
+export BUILDTAG=$(git log --pretty=format:'%h' -n 1)
+
 docker-compose build \
 	--build-arg user=$USER \
 	--build-arg dot_url=https://github.com/mgnsk/dotfiles.git \
