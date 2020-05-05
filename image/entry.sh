@@ -4,10 +4,21 @@ set -euo pipefail
 
 earlyoom &>/dev/null &
 
-useradd -m -G wheel -s /bin/bash ${user}
+# This function prints each argument wrapped in single quotes
+# (separated by spaces).  Any single quotes embedded in the
+# arguments are escaped.
+#
+shell_quote() {
+    # run in a subshell to protect the caller's environment
+    (
+        sep=''
+        for arg in "$@"; do
+            sqesc=$(printf '%s\n' "${arg}" | sed -e "s/'/'\\\\''/g")
+            printf '%s' "${sep}'${sqesc}'"
+            sep=' '
+        done
+    )
+}
 
-echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
-echo "Defaults:${user} !authenticate" >> /etc/sudoers 
-
-sh -c "$@"
+sh -c "$(shell_quote "$@")"
 

@@ -1,6 +1,4 @@
 options:
-  user:
-    default: user
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
@@ -13,14 +11,20 @@ tasks:
         docker-compose
         build
         --pull
-        --build-arg user=${user}
         --build-arg dot_url=${dot_url}
         --build-arg dot_commit=${dot_commit}
     - command: docker image prune -f
 
   bash:
     run:
-    - command: docker-compose run --rm --service-ports dev-env /bin/bash
+    - command: mkdir -p ./code
+    - command: >
+        docker-compose run
+        --rm
+        --service-ports
+        --entrypoint /asuser
+        dev-env
+        /bin/bash
 
   logs:
     run:

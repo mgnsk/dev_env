@@ -16,28 +16,9 @@ RUN pacman -S --needed --noconfirm \
 	rustup \
 	&& rm -rf /var/cache/pacman/pkg
 
-ARG user
 
-RUN useradd -m -G wheel -s /bin/bash ${user} \
-	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers \
-	&& echo "Defaults:${user} !authenticate" >> /etc/sudoers
-
-
-# Direnv installation.
-FROM system-base AS direnv
-
-ARG user
-
-USER ${user}
-
-RUN mkdir -p /tmp/direnv \
-	&& cd /tmp/direnv \
-	&& git clone https://aur.archlinux.org/direnv.git . \
-	&& makepkg -si --noconfirm
-
-
-# User packages.
-FROM system-base AS dev-pkgs
+# Dev packages.
+FROM system-base AS dev-base
 
 RUN pacman -S --needed --noconfirm \
 	ctags \
@@ -49,12 +30,30 @@ RUN pacman -S --needed --noconfirm \
 	&& rm -rf /var/cache/pacman/pkg
 
 
+# Add the builder user.
+FROM system-base as builder-user
+
+RUN useradd -m -G wheel -s /bin/bash builder \
+	&& usermod -d /homedir -m builder \
+	&& echo "Defaults:builder !authenticate" >> /etc/sudoers \
+	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
+
+
+# Direnv installation.
+FROM builder-user AS direnv
+
+USER builder
+
+RUN mkdir -p /tmp/direnv \
+	&& cd /tmp/direnv \
+	&& git clone https://aur.archlinux.org/direnv.git . \
+	&& makepkg -si --noconfirm
+
+
 # Rust installation.
-FROM system-base AS rust
+FROM builder-user AS rust
 
-ARG user
-
-USER ${user}
+USER builder
 
 RUN rustup self upgrade-data \
 	&& rustup update stable \
@@ -62,15 +61,13 @@ RUN rustup self upgrade-data \
 
 
 # User configuration.
-FROM dev-pkgs AS dev-home
-
-ARG user
+FROM builder-user AS dev-home
 
 ARG dot_url
 
 ARG dot_commit
 
-USER ${user}
+USER builder
 
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
@@ -82,25 +79,23 @@ RUN mkdir -p ~/.local/share/chezmoi \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& cd ~ \
 	&& nvim --headless -c 'PlugInstall --sync|qa' \
-	&& nvim --headless -c 'CocInstall -sync coc-rls|qa' \
-	&& mkdir -p ~/code
+	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
 
 
 # Development image.
-FROM dev-pkgs AS dev-env
+FROM dev-base AS dev-env
 
-ARG user
-
-COPY --from=dev-home /home/${user} /home/${user}
-COPY --from=rust --chown=${user}:${user} /home/${user}/.rustup /home/${user}/.rustup
+COPY --from=dev-home --chown=root:wheel /homedir /homedir
+COPY --from=rust --chown=root:wheel /homedir/.rustup /homedir/.rustup
 COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
-COPY ./entry.sh /entry.sh
+COPY ./entry.sh /entry
+COPY ./asuser.sh /asuser
 
-ENV USER ${user}
+RUN chmod +x /entry /asuser \
+	&& mkdir -p /code \
+	&& setfacl -m g:wheel:rw -R /homedir
 
-USER ${user}
+WORKDIR /code
 
-WORKDIR /home/${user}/code
-
-ENTRYPOINT ["/entry.sh"]
+ENTRYPOINT ["/entry"]
 
