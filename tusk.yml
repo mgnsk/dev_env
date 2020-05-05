@@ -12,6 +12,7 @@ tasks:
     run:
     - command: >
         docker-compose
+        build
         --pull
         --build-arg user=${user}
         --build-arg dot_url=${dot_url}
