@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build
         run: >
-          curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
+          sh -c "curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest"
           ./.direnv/tusk build
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push mgnsk/dev-env:latest
