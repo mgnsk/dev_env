@@ -11,9 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build
+
+      - name: Install tusk
         run: |
           curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
+
+      - name: Build
+        run: |
           ./.direnv/bin/tusk build
+
+      - name: Push
+        run: |
           echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push mgnsk/dev-env:latest
+
