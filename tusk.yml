@@ -1,7 +1,6 @@
 options:
   user:
-    default:
-      command: id -un
+    default: user
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
