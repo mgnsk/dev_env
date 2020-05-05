@@ -21,7 +21,7 @@ tasks:
 
   bash:
     run:
-    - command: docker-compose run --rm --service-ports dev-env /dev/bash
+    - command: docker-compose run --rm --service-ports dev-env /bin/bash
 
   logs:
     run:
