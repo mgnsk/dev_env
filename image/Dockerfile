@@ -14,19 +14,12 @@ RUN pacman -S --needed --noconfirm \
 	neovim \
 	go \
 	rustup \
-	&& rm -rf /var/cache/pacman/pkg
-
-
-# Dev packages.
-FROM system-base AS dev-base
-
-RUN pacman -S --needed --noconfirm \
+	nodejs \
+	npm \
 	ctags \
 	fzf \
 	ripgrep \
 	python \
-	nodejs \
-	npm \
 	&& rm -rf /var/cache/pacman/pkg
 
 
@@ -38,11 +31,11 @@ RUN useradd -m -G wheel -s /bin/bash builder \
 	&& echo "Defaults:builder !authenticate" >> /etc/sudoers \
 	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 
+USER builder
+
 
 # Direnv installation.
 FROM builder-user AS direnv
-
-USER builder
 
 RUN mkdir -p /tmp/direnv \
 	&& cd /tmp/direnv \
@@ -52,8 +45,6 @@ RUN mkdir -p /tmp/direnv \
 
 # Rust installation.
 FROM builder-user AS rust
-
-USER builder
 
 RUN rustup self upgrade-data \
 	&& rustup update stable \
@@ -66,8 +57,6 @@ FROM builder-user AS dev-home
 ARG dot_url
 
 ARG dot_commit
-
-USER builder
 
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \ 
@@ -83,19 +72,26 @@ RUN mkdir -p ~/.local/share/chezmoi \
 
 
 # Development image.
-FROM dev-base AS dev-env
+FROM system-base AS dev-env
 
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY --from=rust --chown=root:wheel /homedir/.rustup /homedir/.rustup
 COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
-COPY ./entry.sh /entry
-COPY ./asuser.sh /asuser
+COPY ./asroot.sh /asroot.sh
+COPY ./asuser.sh /asuser.sh
 
-RUN chmod +x /entry /asuser \
+RUN chmod +x /asroot.sh /asuser.sh \
 	&& mkdir -p /code \
-	&& setfacl -m g:wheel:rw -R /homedir
+	&& mkdir -p \
+	/homedir/.local \
+	/homedir/.config \
+	/homedir/.cache \
+	&& setfacl -m g:wheel:rwx -R \
+	/homedir/.local \
+	/homedir/.config \
+	/homedir/.cache
 
 WORKDIR /code
 
-ENTRYPOINT ["/entry"]
+ENTRYPOINT ["/asroot.sh"]
 

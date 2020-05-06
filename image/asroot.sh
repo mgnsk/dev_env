@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-earlyoom &>/dev/null &
+earlyoom &> /dev/null &
 
 # This function prints each argument wrapped in single quotes
 # (separated by spaces).  Any single quotes embedded in the

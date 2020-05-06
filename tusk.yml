@@ -3,6 +3,18 @@ options:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
     default: e579dda
+  uid:
+    default:
+      command: id -u
+  user:
+    default:
+      command: id -un
+  gid:
+    default:
+      command: id -g
+  group:
+    default:
+      command: id -gn
 
 tasks:
   build:
@@ -13,16 +25,22 @@ tasks:
         --pull
         --build-arg dot_url=${dot_url}
         --build-arg dot_commit=${dot_commit}
-    - command: docker image prune -f
+    #- command: docker image prune -f
 
   bash:
+    usage: Run a bash shell as user.
+    description: The user is created and permissions set on entry.
     run:
     - command: mkdir -p ./code
     - command: >
         docker-compose run
         --rm
         --service-ports
-        --entrypoint /asuser
+        --entrypoint /asuser.sh
+        -e UID=5000
+        -e USER=devuser
+        -e GID=6000
+        -e GROUP=devgroup
         dev-env
         /bin/bash
 

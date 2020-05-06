@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-earlyoom &>/dev/null &
+earlyoom &> /dev/null &
 
 groupadd $GROUP
 groupmod -g $GID $GROUP

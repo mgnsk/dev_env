@@ -10,18 +10,14 @@ services:
     #mem_reservation: 1G
     #memswap_limit: 4G
     #mem_swappiness: 0
-    environment:
-      # User and group are created on entry if /asuser entrypoint is used.
-      - UID=5000
-      - USER=devuser
-      - GID=6000
-      - GROUP=devgroup
     build:
       context: ./image
       target: dev-env
       args:
       - dot_url
       - dot_commit
+    ports:
+      - 6060:6060 # gopls debug
     volumes:
       - ./code:/code
 
