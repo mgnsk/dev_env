@@ -48,9 +48,8 @@ RUN mkdir -p /tmp/direnv \
 FROM builder-user AS rust
 
 RUN rustup self upgrade-data \
-	&&rustup update stable
-
-RUN rustup component add rls rust-analysis rust-src
+	&& rustup update stable \
+	&& rustup component add rls rust-analysis rust-src
 
 
 # User configuration.
@@ -69,7 +68,10 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& cd ~ \
+	# Install go tooling.
 	&& nvim --headless -c 'PlugInstall --sync|qa' \
+	&& rm -rf ~/go/pkg \
+	# Install rust language server plugin.
 	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
 
 
