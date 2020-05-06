@@ -40,7 +40,7 @@ FROM builder-user AS direnv
 
 RUN mkdir -p /tmp/direnv \
 	&& cd /tmp/direnv \
-	&& git clone https://aur.archlinux.org/direnv.git . \
+	&& git clone --depth 1 https://aur.archlinux.org/direnv.git . \
 	&& makepkg -si --noconfirm
 
 
