@@ -1,18 +1,19 @@
-options:
-  dot_url:
-    default: https://github.com/mgnsk/dotfiles.git
-  dot_commit:
-    default: e579dda
-
 tasks:
   build:
+    options:
+      dot_url:
+        default: https://github.com/mgnsk/dotfiles.git
+      dot_commit:
+        default: e579dda
     run:
     - command: >
-        docker-compose
+        docker
         build
         --pull
         --build-arg dot_url=${dot_url}
         --build-arg dot_commit=${dot_commit}
+        -t mgnsk/dev-env:latest
+        ./image
     - command: docker image prune -f
 
   bash:
