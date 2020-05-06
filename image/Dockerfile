@@ -97,8 +97,10 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	/homedir/.config \
 	/homedir/.cache \
 	&& chown root:wheel /code \
-	# Make all new files created as wheel group.
-	&& chmod g+rwxs /code
+	# Make all new files created owned by wheel group.
+	# The umask 002 set in asuser.sh entrypoint makes
+	# sure that new files are group writable.
+	&& chmod g+rws /code
 
 WORKDIR /code
 
