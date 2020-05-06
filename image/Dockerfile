@@ -7,6 +7,7 @@ RUN pacman-key --init \
 
 RUN pacman -S --needed --noconfirm \
 	base-devel \
+	openssh \
 	earlyoom \
 	chezmoi \
 	git \
@@ -81,15 +82,23 @@ COPY ./asroot.sh /asroot.sh
 COPY ./asuser.sh /asuser.sh
 
 RUN chmod +x /asroot.sh /asuser.sh \
-	&& mkdir -p /code \
+	&& mkdir -p \
+	/code \
+	/homedir/.ssh \
+	# Make accessible to owner only. We set the owner in entrypoint.
+	&& chmod 0700 /homedir/.ssh \
+	# For other dirs, use the generic wheel group.
 	&& mkdir -p \
 	/homedir/.local \
 	/homedir/.config \
 	/homedir/.cache \
-	&& setfacl -m g:wheel:rwx -R \
+	&& setfacl -m g:wheel:rw -R \
 	/homedir/.local \
 	/homedir/.config \
-	/homedir/.cache
+	/homedir/.cache \
+	&& chown root:wheel /code \
+	# Make all new files created as wheel group.
+	&& chmod g+rwxs /code
 
 WORKDIR /code
 

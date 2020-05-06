@@ -11,7 +11,7 @@ useradd -r -u $UID -g $GID -s /bin/bash $USER
 gpasswd -a $USER wheel
 usermod -d /homedir -m $USER
 
-setfacl -m g:$GROUP:rw -R /code
+chown -R $USER:$GROUP /homedir/.ssh
 
 # This function prints each argument wrapped in single quotes
 # (separated by spaces).  Any single quotes embedded in the
@@ -29,5 +29,5 @@ shell_quote() {
     )
 }
 
-sudo -u $USER -H sh -c "$(shell_quote "$@")"
+sudo -u $USER -H sh -c "umask 002; $(shell_quote "$@")"
 
