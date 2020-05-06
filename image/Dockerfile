@@ -92,7 +92,7 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	/homedir/.local \
 	/homedir/.config \
 	/homedir/.cache \
-	&& setfacl -m g:wheel:rw -R \
+	&& setfacl -m g:wheel:rwX -R \
 	/homedir/.local \
 	/homedir/.config \
 	/homedir/.cache \
