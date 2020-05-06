@@ -29,7 +29,6 @@ tasks:
       group:
         default: devgroup
     run:
-    - command: mkdir -p ./code
     - command: >
         docker-compose run
         --rm

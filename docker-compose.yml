@@ -1,5 +1,9 @@
 version: "2.4"
 
+volumes:
+  ssh-key:
+  code:
+
 services:
   dev-env:
     image: mgnsk/dev-env:latest
@@ -13,5 +17,6 @@ services:
     ports:
       - 6060:6060 # gopls debug
     volumes:
-      - ./code:/code
+      - code:/code
+      - ssh-key:/homedir/.ssh
 
