@@ -48,8 +48,9 @@ RUN mkdir -p /tmp/direnv \
 FROM builder-user AS rust
 
 RUN rustup self upgrade-data \
-	&& rustup update stable \
-	&& rustup component add rls rust-analysis rust-src
+	&&rustup update stable
+
+RUN rustup component add rls rust-analysis rust-src
 
 
 # User configuration.
