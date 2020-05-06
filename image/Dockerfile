@@ -70,7 +70,7 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~ \
 	# Install go tooling.
 	&& nvim --headless -c 'PlugInstall --sync|qa' \
-	&& rm -rf ~/go/pkg \
+	&& sudo rm -rf ~/go/pkg \
 	# Install rust language server plugin.
 	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
 
