@@ -45,3 +45,7 @@ tasks:
     run:
     - command: docker-compose logs -f -t --tail="all"
 
+  clean:
+    run:
+    - command: docker image rm mgnsk/dev-env
+

@@ -13,3 +13,14 @@ The `/asuser.sh` entrypoint creates a user and runs as it.
 
 It seems that after a while of mindlessly `gd`-ing (goto definition) around in the stdlib (`gopls` may have automatically restarted already), it probably finishes scanning the code and finally stays at a stable memory usage. The `earlyoom` prevents the host system from freezing.
 
+### Tasks
+
+Build and run:
+`$ tusk build`
+`$ tusk bash`
+ 
+
+ To download/update image, run:
+ `$ tusk clean`
+ `$ tusk bash`
+
