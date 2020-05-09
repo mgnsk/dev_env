@@ -32,6 +32,7 @@ tasks:
         default:
           command: id -gn
     run:
+    - command: mkdir -p ./code
     - command: >
         docker-compose run
         --rm
