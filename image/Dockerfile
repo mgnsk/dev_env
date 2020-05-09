@@ -78,15 +78,15 @@ RUN mkdir -p ~/.local/share/chezmoi \
 # Development image.
 FROM system-base AS dev-env
 
+COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY --from=rust --chown=root:wheel /homedir/.rustup /homedir/.rustup
-COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 COPY ./asroot.sh /asroot.sh
 COPY ./asuser.sh /asuser.sh
 
 RUN chmod +x /asroot.sh /asuser.sh \
 	&& mkdir -p \
-	/code \
+	/vol \
 	/homedir/.ssh \
 	# Make accessible to owner only. We set the owner in entrypoint.
 	&& chmod 0700 /homedir/.ssh \
@@ -99,13 +99,13 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	/homedir/.local \
 	/homedir/.config \
 	/homedir/.cache \
-	&& chown root:wheel /code \
+	&& chown root:wheel /vol \
 	# Make all new files created owned by wheel group.
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.
-	&& chmod g+rws /code
+	&& chmod g+rws /vol
 
-WORKDIR /code
+WORKDIR /vol
 
 ENTRYPOINT ["/asroot.sh"]
 

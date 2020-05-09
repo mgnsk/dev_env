@@ -2,7 +2,7 @@ version: "2.4"
 
 volumes:
   ssh-key:
-  code:
+  vol:
 
 services:
   dev-env:
@@ -17,6 +17,7 @@ services:
     ports:
       - 6060:6060 # gopls debug
     volumes:
-      - code:/code
       - ssh-key:/homedir/.ssh
+      - vol:/vol
+      - ./code:/code
 
