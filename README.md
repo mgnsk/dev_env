@@ -16,11 +16,14 @@ It seems that after a while of mindlessly `gd`-ing (goto definition) around in t
 ### Tasks
 
 Build and run:
+
 `$ tusk build`
+
 `$ tusk bash`
  
 
  To download/update image, run:
- `$ tusk clean`
- `$ tusk bash`
 
+`$ tusk clean`
+
+`$ tusk bash`
