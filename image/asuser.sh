@@ -13,6 +13,9 @@ usermod -d /homedir -m $USER
 
 chown -R $USER:$GROUP /homedir/.ssh
 
+echo "Defaults:${USER} !authenticate" >> /etc/sudoers
+echo "%${GROUP} ALL=(ALL) ALL" >> /etc/sudoers
+
 # This function prints each argument wrapped in single quotes
 # (separated by spaces).  Any single quotes embedded in the
 # arguments are escaped.

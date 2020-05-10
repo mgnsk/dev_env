@@ -17,10 +17,10 @@ RUN pacman -S --needed --noconfirm \
 	rustup \
 	nodejs \
 	npm \
+	yarn \
 	ctags \
 	fzf \
 	ripgrep \
-	python \
 	&& rm -rf /var/cache/pacman/pkg
 
 
@@ -60,7 +60,7 @@ ARG dot_url
 ARG dot_commit
 
 RUN mkdir -p ~/.local/share/chezmoi \
-	&& cd ~/.local/share/chezmoi \ 
+	&& cd ~/.local/share/chezmoi \
 	&& git clone ${dot_url} . \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
