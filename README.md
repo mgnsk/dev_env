@@ -8,8 +8,11 @@ Quick run
 The default entrypoint `/asroot.sh` runs as root.
 The `/asuser.sh` entrypoint creates a user and runs as it.
 
+### Bind mount
+* `./code:/code`
+
 ### Persistent volumes
-* `/code`
+* `/vol`
 * `/homedir/.ssh`
 
 ### Go
