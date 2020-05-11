@@ -50,5 +50,5 @@ tasks:
 
   clean:
     run:
-    - command: docker image rm mgnsk/dev-env
+    - command: docker rmi mgnsk/dev-env
 
