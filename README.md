@@ -3,7 +3,7 @@
 This image serves the purpose of documenting my default environment. The dotfiles URL and commit are build arguments which accept a repository managed with [chezmoi](https://github.com/twpayne/chezmoi).
 
 Quick run
-`$ docker run --rm -it --entrypoint /asuser.sh -e UID=$(id -u) -e USER=$(id -un) -e GID=$(id -g) -e GROUP=$(id -gn) mgnsk/dev-env /bin/bash`
+`$ docker run --rm -it --entrypoint /asuser.sh -w /tmp -e UID=$(id -u) -e USER=$(id -un) -e GID=$(id -g) -e GROUP=$(id -gn) mgnsk/dev-env /bin/bash`
 
 The default entrypoint `/asroot.sh` runs as root.
 The `/asuser.sh` entrypoint creates a user and runs as it.
