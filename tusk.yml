@@ -4,7 +4,7 @@ tasks:
       dot_url:
         default: https://github.com/mgnsk/dotfiles.git
       dot_commit:
-        default: e0545ef47fd97dc934b15d3eded5a0197ca5ec32
+        default: b557586580da022b1c16128d39c48e9dcce8a9cb
     run:
     - command: >
         docker
@@ -36,7 +36,6 @@ tasks:
     - command: >
         docker-compose run
         --rm
-        --service-ports
         --entrypoint /asuser.sh
         -e UID=${uid}
         -e USER=${user}

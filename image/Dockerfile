@@ -105,7 +105,7 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	# sure that new files are group writable.
 	&& chmod g+rws /vol
 
-WORKDIR /vol
+WORKDIR /code
 
 ENTRYPOINT ["/asroot.sh"]
 
