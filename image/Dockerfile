@@ -64,15 +64,7 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& git clone ${dot_url} . \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
-	&& rm -rf ~/.local/share/chezmoi \
-	&& curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& cd ~ \
-	# Install go tooling.
-	&& nvim --headless -c 'PlugInstall --sync|qa' \
-	&& sudo rm -rf /homedir/go/pkg \
-	# Install rust language server plugin.
-	&& nvim --headless -c 'CocInstall -sync coc-rls|qa'
+	&& rm -rf ~/.local/share/chezmoi
 
 
 # Development image.
@@ -85,13 +77,11 @@ COPY ./asroot.sh /asroot.sh
 COPY ./asuser.sh /asuser.sh
 
 RUN chmod +x /asroot.sh /asuser.sh \
-	&& mkdir -p \
-	/vol \
-	/homedir/.ssh \
 	# Make accessible to owner only. We set the owner in entrypoint.
-	&& chmod 0700 /homedir/.ssh \
+	&& install -d -m 0700 -o root -g wheel \
+	/homedir/.ssh \
 	# For other dirs, use the generic wheel group.
-	&& mkdir -p \
+	install -d -m 0755 -o root -g wheel \
 	/homedir/.local \
 	/homedir/.config \
 	/homedir/.cache \
@@ -99,13 +89,12 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	/homedir/.local \
 	/homedir/.config \
 	/homedir/.cache \
-	&& chown root:wheel /vol \
 	# Make all new files created owned by wheel group.
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.
-	&& chmod g+rws /vol
+	&& chmod g+rws /homedir
 
-WORKDIR /homedir/.local
+WORKDIR /homedir
 
 ENTRYPOINT ["/asroot.sh"]
 
