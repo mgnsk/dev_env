@@ -21,7 +21,9 @@ jobs:
           ./.direnv/bin/tusk build
 
       - name: Push
+        with:
+          docker_token: ${{ secrets.DOCKER_TOKEN }}
         run: |
-          echo ${{ secrets.DOCKER_TOKEN }} | docker login --username mgnsk --password-stdin
+          docker login --username mgnsk --password-stdin
           docker push mgnsk/dev-env:latest
 

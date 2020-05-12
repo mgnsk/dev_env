@@ -4,7 +4,7 @@ tasks:
       dot_url:
         default: https://github.com/mgnsk/dotfiles.git
       dot_commit:
-        default: d16b13121c9838203fa706df859244799d75a5f1
+        default: 086f41c1c2bdc53c126dcd46b9ff2a9b19ea52f9
     run:
     - command: >
         docker
@@ -41,6 +41,7 @@ tasks:
         -e USER=${user}
         -e GID=${gid}
         -e GROUP=${group}
+        -w /code
         dev-env
         /bin/bash
 
