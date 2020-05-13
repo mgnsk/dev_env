@@ -33,17 +33,12 @@ tasks:
           command: id -gn
     run:
     - command: mkdir -p ./code
-    - command: >
-        docker-compose run
-        --rm
-        --entrypoint /asuser.sh
-        -e UID=${uid}
-        -e USER=${user}
-        -e GID=${gid}
-        -e GROUP=${group}
-        -w /code
-        dev-env
-        /bin/bash
+    - set-environment:
+        UID: ${uid}
+        USER: ${user}
+        GID: ${gid}
+        GROUP: ${group}
+    - command: docker-compose run --rm --entrypoint /asuser.sh dev-env /bin/bash
 
   logs:
     run:
