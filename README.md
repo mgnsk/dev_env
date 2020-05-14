@@ -11,9 +11,8 @@ The `/asuser.sh` entrypoint creates a user and runs as it.
 ### Bind mount
 * `./code:/code`
 
-### Persistent volumes
-* `/vol`
-* `/homedir/.ssh`
+### Persistent volume
+* `/homedir`
 
 ### Go
 
