@@ -4,7 +4,7 @@ tasks:
       dot_url:
         default: https://github.com/mgnsk/dotfiles.git
       dot_commit:
-        default: 74448681b4d63fbf9891d6e7c34d7a663f1d3593
+        default: 6b4fd983c3ec648b0f9860a77b25021ac6aeff63
     run:
     - command: >
         docker
