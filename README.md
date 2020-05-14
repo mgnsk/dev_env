@@ -8,12 +8,6 @@ Quick run
 The default entrypoint `/asroot.sh` runs as root.
 The `/asuser.sh` entrypoint creates a user and runs as it.
 
-### Bind mount
-* `./code:/code`
-
-### Persistent volume
-* `/homedir`
-
 ### Go
 
 `earlyoom` is started on each bash session. It terminates `gopls` when memory gets full allowing `coc.nvim` to restart it quickly. `coc.nvim` should sort itself out, the next `gd` or equivalent should automatically trigger a new `gopls` instance. The instance is also shared with `vim-go`. If everything automatic fails, use `:CocRestart`.
