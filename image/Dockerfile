@@ -64,7 +64,12 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& git clone ${dot_url} . \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
-	&& rm -rf ~/.local/share/chezmoi
+	&& rm -rf ~/.local/share/chezmoi \
+	&& cd ~ \
+	&& curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
+	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
+	&& nvim --headless -S ~/.config/nvim/plugin.lock -c 'qa' \
+	&& sudo rm -rf ~/go/pkg
 
 
 # Development image.
@@ -83,12 +88,14 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	# For other dirs, use the generic wheel group.
 	install -d -m 0755 -o root -g wheel \
 	/homedir/.local \
-	/homedir/.config \
 	/homedir/.cache \
+	/homedir/.config \
+	/homedir/.config/coc \
+	/homedir/.local/share/direnv \
 	&& setfacl -m g:wheel:rwX -R \
 	/homedir/.local \
-	/homedir/.config \
 	/homedir/.cache \
+	/homedir/.config \
 	# Make all new files created owned by wheel group.
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.

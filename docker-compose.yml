@@ -1,7 +1,8 @@
 version: '2'
 
 volumes:
-  homedir:
+  ssh-key:
+  coc-data:
 
 services:
   dev-env:
@@ -14,6 +15,7 @@ services:
     - GROUP=${GROUP}
     working_dir: /code
     volumes:
-    - homedir:/homedir
+    - ssh-key:/homedir/.ssh
+    - coc-data:/homedir/.config/coc
     - ./code:/code
 
