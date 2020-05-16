@@ -42,12 +42,9 @@ RUN mkdir -p /tmp/earlyoom \
 
 
 # Rust installation.
-FROM build-base AS dev-rust
+FROM rust:alpine AS dev-rust
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-RUN source ~/.cargo/env \
-	&& rustup component add rls rust-analysis rust-src
+RUN rustup component add rls rust-analysis rust-src
 
 
 # Go installation.
@@ -76,7 +73,7 @@ COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=node-env /node /node
 
 ENV GOPATH=/homedir/go \
-	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:$PATH
+	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:$PATH
 
 RUN adduser \
 	--disabled-password \
@@ -98,7 +95,7 @@ RUN mkdir -p /homedir/.local/share/chezmoi \
 	&& cd /homedir \
 	&& curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& npm config set prefix /homedir/.npm \
+	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
@@ -111,15 +108,15 @@ FROM system-pkgs AS dev-env
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=node-env /node /node
-COPY --from=dev-rust /homedir/.cargo /cargo
-COPY --from=dev-rust /homedir/.rustup /rustup
+COPY --from=dev-rust /usr/local/cargo /cargo
+COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY ./asuser.sh /asuser.sh
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
 	GOPATH=/homedir/go \
-	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
+	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
 RUN chmod +x /asuser.sh \
 	# Make accessible to owner only. We set the owner in entrypoint.
@@ -139,8 +136,7 @@ RUN chmod +x /asuser.sh \
 	# Make all new files created owned by wheel group.
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.
-	&& chmod g+rws /homedir \
-	&& npm config set prefix ~/.npm
+	&& chmod g+rws /homedir
 
 WORKDIR /homedir
 
