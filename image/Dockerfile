@@ -75,28 +75,34 @@ RUN apk --no-cache add git chezmoi curl neovim
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=node-env /node /node
 
-ARG dot_url
-
-ARG dot_commit
-
 ENV GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:$PATH
 
+RUN adduser \
+	--disabled-password \
+	--gecos "" \
+	--home /homedir \
+	--ingroup wheel \
+	builder
+
+USER builder
+
+ARG dot_commit
+
 RUN mkdir -p /homedir/.local/share/chezmoi \
 	&& cd /homedir/.local/share/chezmoi \
-	&& git clone ${dot_url} . \
+	&& git clone https://github.com/mgnsk/dotfiles.git . \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
 	&& rm -rf /homedir/.local/share/chezmoi \
-	&& cd ~ \
+	&& cd /homedir \
 	&& curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm \
 	&& npm install -g yarn \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
-	&& nvim --headless -S /homedir/.vim/plugin.lock -c 'qa' \
-	&& sudo rm -rf /homedir/go/pkg
+	&& nvim --headless -S /homedir/.vim/plugin.lock -c 'qa'
 
 
 # Development image.

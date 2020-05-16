@@ -1,8 +1,6 @@
 tasks:
   build:
     options:
-      dot_url:
-        default: https://github.com/mgnsk/dotfiles.git
       dot_commit:
         default: e2a6d45ea9e07d9cfe2ad08d0077093fa76ba0dc
     run:
@@ -10,7 +8,6 @@ tasks:
         docker
         build
         --pull
-        --build-arg dot_url=${dot_url}
         --build-arg dot_commit=${dot_commit}
         -t mgnsk/dev-env:latest
         ./image
