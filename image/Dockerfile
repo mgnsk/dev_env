@@ -5,22 +5,15 @@ RUN pacman-key --init \
 	&& pacman-key --populate archlinux \
 	&& pacman -Syu --noconfirm
 
+# Install manually instead of base-devel.
 RUN pacman -S --needed --noconfirm \
-	base-devel \
-	openssh \
-	earlyoom \
-	chezmoi \
+	sudo \
+	fakeroot \
+	binutils \
+	make \
 	git \
-	vim \
-	neovim \
 	go \
 	rustup \
-	nodejs \
-	npm \
-	yarn \
-	ctags \
-	fzf \
-	ripgrep \
 	&& rm -rf /var/cache/pacman/pkg
 
 
@@ -52,6 +45,26 @@ RUN rustup self upgrade-data \
 	&& rustup component add rls rust-analysis rust-src
 
 
+# Development packages
+FROM system-base AS dev-pkgs
+
+RUN pacman -S --needed --noconfirm \
+	tree \
+	most \
+	openssh \
+	earlyoom \
+	chezmoi \
+	vim \
+	neovim \
+	nodejs \
+	npm \
+	yarn \
+	ctags \
+	fzf \
+	ripgrep \
+	&& rm -rf /var/cache/pacman/pkg
+
+
 # User configuration.
 FROM builder-user AS dev-home
 
@@ -73,7 +86,7 @@ RUN mkdir -p ~/.local/share/chezmoi \
 
 
 # Development image.
-FROM system-base AS dev-env
+FROM dev-pkgs AS dev-env
 
 COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
