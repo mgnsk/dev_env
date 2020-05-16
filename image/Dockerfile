@@ -82,21 +82,21 @@ ARG dot_commit
 ENV GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:$PATH
 
-RUN mkdir -p ~/.local/share/chezmoi \
-	&& cd ~/.local/share/chezmoi \
+RUN mkdir -p /homedir/.local/share/chezmoi \
+	&& cd /homedir/.local/share/chezmoi \
 	&& git clone ${dot_url} . \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
-	&& rm -rf ~/.local/share/chezmoi \
+	&& rm -rf /homedir/.local/share/chezmoi \
 	&& cd ~ \
-	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+	&& curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
-	&& npm config set prefix ~/.npm \
+	&& npm config set prefix /homedir/.npm \
 	&& npm install -g yarn \
+	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
-	&& nvim --headless -S ~/.vim/plugin.lock -c 'qa' \
-	&& sudo rm -rf ~/go/pkg
+	&& nvim --headless -S /homedir/.vim/plugin.lock -c 'qa' \
+	&& sudo rm -rf /homedir/go/pkg
 
 
 # Development image.
