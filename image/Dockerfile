@@ -94,6 +94,7 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
 	&& rm -rf ~/.local/share/chezmoi \
+	&& cd ~ \
 	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
