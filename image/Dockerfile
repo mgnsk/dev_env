@@ -7,6 +7,7 @@ RUN apk update \
 	build-base \
 	acl \
 	sudo \
+	shadow \
 	bash \
 	ncurses \
 	curl \

@@ -4,7 +4,10 @@ set -o pipefail
 
 earlyoom &> /dev/null &
 
-addgroup --gid $GID $GROUP
+addgroup -g $GID $GROUP
+
+# In case the group exists.
+groupmod -g $GID $GROUP
 
 adduser \
 	--disabled-password \
@@ -15,13 +18,6 @@ adduser \
 	$USER
 
 addgroup $USER wheel
-
-#groupadd $GROUP
-#groupmod -g $GID $GROUP
-
-#useradd -r -u $UID -g $GID -s /bin/bash $USER
-#gpasswd -a $USER wheel
-#usermod -d /homedir -m $USER
 
 chown -R $USER:$GROUP /homedir/.ssh
 
