@@ -1,10 +1,15 @@
-# Base system.
-FROM alpine:edge AS system-base
+FROM alpine:edge AS build-base
 
 RUN apk update \
 	&& apk --no-cache upgrade \
 	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
-	build-base \
+	build-base
+
+
+# System packages.
+FROM build-base AS system-pkgs
+
+RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	acl \
 	sudo \
 	shadow \
@@ -25,23 +30,10 @@ RUN apk update \
 	ripgrep
 
 
-# Set up build user.
-FROM system-base AS build-user
-
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home /homedir \
-    --ingroup wheel \
-    builder \
-	&& echo "Defaults:builder !authenticate" >> /etc/sudoers \
-	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
-
-USER builder
-
-
 # earlyoom installation.
-FROM build-user AS dev-earlyoom
+FROM build-base AS dev-earlyoom
+
+RUN apk --no-cache add git 
 
 RUN mkdir -p /tmp/earlyoom \
 	&& cd /tmp/earlyoom \
@@ -50,7 +42,7 @@ RUN mkdir -p /tmp/earlyoom \
 
 
 # Rust installation.
-FROM build-user AS dev-rust
+FROM build-base AS dev-rust
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
@@ -76,7 +68,9 @@ RUN ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
 
 
 # User dotfiles and plugins.
-FROM build-user AS dev-home
+FROM build-base AS dev-home
+
+RUN apk --no-cache add git chezmoi curl neovim
 
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=node-env /node /node
@@ -106,7 +100,7 @@ RUN mkdir -p ~/.local/share/chezmoi \
 
 
 # Development image.
-FROM system-base AS dev-env
+FROM system-pkgs AS dev-env
 
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
@@ -115,6 +109,11 @@ COPY --from=dev-rust /homedir/.cargo /cargo
 COPY --from=dev-rust /homedir/.rustup /rustup
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY ./asuser.sh /asuser.sh
+
+ENV RUSTUP_HOME=/rustup \
+    CARGO_HOME=/cargo \
+	GOPATH=/homedir/go \
+	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
 RUN chmod +x /asuser.sh \
 	# Make accessible to owner only. We set the owner in entrypoint.
@@ -134,16 +133,8 @@ RUN chmod +x /asuser.sh \
 	# Make all new files created owned by wheel group.
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.
-	&& chmod g+rws /homedir
-
-ENV RUSTUP_HOME=/rustup \
-    CARGO_HOME=/cargo \
-    PATH=/cargo/bin:$PATH
-
-ENV GOPATH=/homedir/go \
-	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
-
-RUN npm config set prefix ~/.npm
+	&& chmod g+rws /homedir \
+	&& npm config set prefix ~/.npm
 
 WORKDIR /homedir
 
