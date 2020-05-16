@@ -4,12 +4,24 @@ set -o pipefail
 
 earlyoom &> /dev/null &
 
-groupadd $GROUP
-groupmod -g $GID $GROUP
+addgroup --gid $GID $GROUP
 
-useradd -r -u $UID -g $GID -s /bin/bash $USER
-gpasswd -a $USER wheel
-usermod -d /homedir -m $USER
+adduser \
+	--disabled-password \
+	--gecos "" \
+	--home /homedir \
+	--ingroup $GROUP \
+	--uid $UID \
+	$USER
+
+addgroup $USER wheel
+
+#groupadd $GROUP
+#groupmod -g $GID $GROUP
+
+#useradd -r -u $UID -g $GID -s /bin/bash $USER
+#gpasswd -a $USER wheel
+#usermod -d /homedir -m $USER
 
 chown -R $USER:$GROUP /homedir/.ssh
 

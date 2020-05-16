@@ -7,6 +7,7 @@ RUN apk update \
 	build-base \
 	acl \
 	sudo \
+	bash \
 	curl \
 	direnv \
 	git \
@@ -25,25 +26,8 @@ RUN apk update \
 	ripgrep
 
 
-# Rust installation.
-FROM rust:alpine AS dev-rust
-
-RUN rustup component add rls rust-analysis rust-src
-
-
-# earlyoom installation.
-FROM system-base AS dev-earlyoom
-
-RUN mkdir -p /tmp/earlyoom \
-	&& cd /tmp/earlyoom \
-	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
-	&& make
-
-
-# User dotfiles and plugins.
-FROM system-base AS dev-home
-
-COPY --from=golang:alpine /usr/local/go /usr/local/go
+# Set up build user.
+FROM system-base AS build-user
 
 RUN adduser \
     --disabled-password \
@@ -55,6 +39,30 @@ RUN adduser \
 	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
 
 USER builder
+
+
+# Rust installation.
+FROM build-user AS dev-rust
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+RUN source ~/.cargo/env \
+	&& rustup component add rls rust-analysis rust-src
+
+
+# earlyoom installation.
+FROM build-user AS dev-earlyoom
+
+RUN mkdir -p /tmp/earlyoom \
+	&& cd /tmp/earlyoom \
+	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
+	&& make
+
+
+# User dotfiles and plugins.
+FROM build-user AS dev-home
+
+COPY --from=golang:alpine /usr/local/go /usr/local/go
 
 ARG dot_url
 
@@ -79,15 +87,14 @@ RUN mkdir -p ~/.local/share/chezmoi \
 # Development image.
 FROM system-base AS dev-env
 
-COPY --from=dev-rust /usr/local/rustup /usr/local/rustup
-COPY --from=dev-rust /usr/local/cargo /usr/local/cargo
 COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
-COPY ./asroot.sh /asroot.sh
+COPY --from=dev-rust /homedir/.cargo /homedir/.cargo
+COPY --from=dev-rust /homedir/.rustup /homedir/.rustup
 COPY ./asuser.sh /asuser.sh
 
-RUN chmod +x /asroot.sh /asuser.sh \
+RUN chmod +x /asuser.sh \
 	# Make accessible to owner only. We set the owner in entrypoint.
 	&& install -d -m 0700 -o root -g wheel \
 	/homedir/.ssh \
@@ -107,10 +114,8 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	# sure that new files are group writable.
 	&& chmod g+rws /homedir
 
-ENV GOPATH /homedir/go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:/usr/local/cargo/bin:$PATH
+ENV GOPATH=/homedir/go \
+	PATH=$GOPATH/bin:/usr/local/go/bin:/homedir/.cargo/bin:$PATH
 
 WORKDIR /homedir
-
-ENTRYPOINT ["/asroot.sh"]
 
