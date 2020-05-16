@@ -10,7 +10,6 @@ RUN apk update \
 	shadow \
 	bash \
 	ncurses \
-	expect \
 	curl \
 	direnv \
 	git \
@@ -19,10 +18,8 @@ RUN apk update \
 	openssh \
 	chezmoi \
 	vim \
+	neovim \
 	luajit \
-	nodejs \
-	npm \
-	yarn \
 	ctags \
 	fzf \
 	ripgrep
@@ -43,15 +40,6 @@ RUN adduser \
 USER builder
 
 
-# Rust installation.
-FROM build-user AS dev-rust
-
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-RUN source ~/.cargo/env \
-	&& rustup component add rls rust-analysis rust-src
-
-
 # earlyoom installation.
 FROM build-user AS dev-earlyoom
 
@@ -61,17 +49,44 @@ RUN mkdir -p /tmp/earlyoom \
 	&& make
 
 
+# Rust installation.
+FROM build-user AS dev-rust
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+RUN source ~/.cargo/env \
+	&& rustup component add rls rust-analysis rust-src
+
+
+# Go installation.
+FROM golang:alpine AS dev-go
+
+
+# NodeJS installation.
+FROM node:alpine AS dev-node
+
+
+# Node binaries.
+FROM alpine:edge AS node-env
+
+COPY --from=dev-node /usr/local/bin/node /node/bin/node
+COPY --from=dev-node /usr/local/lib/node_modules /node/lib/node_modules
+RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm
+RUN ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
+
+
 # User dotfiles and plugins.
 FROM build-user AS dev-home
 
-COPY --from=golang:alpine /usr/local/go /usr/local/go
+COPY --from=dev-go /usr/local/go /usr/local/go
+COPY --from=node-env /node /node
 
 ARG dot_url
 
 ARG dot_commit
 
-ENV GOPATH=/homedir/go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+ENV GOPATH=/homedir/go \
+	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:$PATH
 
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \
@@ -79,21 +94,25 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
 	&& rm -rf ~/.local/share/chezmoi \
-	&& cd ~ \
 	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& expect -c "spawn vim -S ~/.vim/plugin.lock -c 'qa'; expect eof" \
-	&& expect -c "spawn vim -S ~/.vim/gosetup.vim -c 'qa'; expect eof" \
+	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
+	&& npm config set prefix ~/.npm \
+	&& npm install -g yarn \
+	&& ln -s /homedir/.vim /homedir/.config/nvim \
+	&& nvim --headless -S ~/.vim/plugin.lock -c 'qa' \
 	&& sudo rm -rf ~/go/pkg
+
 
 # Development image.
 FROM system-base AS dev-env
 
-COPY --from=golang:alpine /usr/local/go /usr/local/go
+COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
+COPY --from=node-env /node /node
+COPY --from=dev-rust /homedir/.cargo /cargo
+COPY --from=dev-rust /homedir/.rustup /rustup
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
-COPY --from=dev-rust /homedir/.cargo /homedir/.cargo
-COPY --from=dev-rust /homedir/.rustup /homedir/.rustup
 COPY ./asuser.sh /asuser.sh
 
 RUN chmod +x /asuser.sh \
@@ -110,14 +129,20 @@ RUN chmod +x /asuser.sh \
 	&& setfacl -m g:wheel:rwX -R \
 	/homedir/.local \
 	/homedir/.cache \
-	/homedir/.config \
+	/homedir/.config/coc \
 	# Make all new files created owned by wheel group.
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.
 	&& chmod g+rws /homedir
 
+ENV RUSTUP_HOME=/rustup \
+    CARGO_HOME=/cargo \
+    PATH=/cargo/bin:$PATH
+
 ENV GOPATH=/homedir/go \
-	PATH=$GOPATH/bin:/usr/local/go/bin:/homedir/.cargo/bin:$PATH
+	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
+
+RUN npm config set prefix ~/.npm
 
 WORKDIR /homedir
 

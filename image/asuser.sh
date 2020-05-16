@@ -40,5 +40,5 @@ shell_quote() {
     )
 }
 
-sudo -u $USER -H sh -c "umask 002; $(shell_quote "$@")"
+sudo -E -u $USER -H sh -c "umask 002; $(shell_quote "$@")"
 
