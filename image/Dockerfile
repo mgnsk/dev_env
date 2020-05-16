@@ -8,6 +8,7 @@ RUN apk update \
 	acl \
 	sudo \
 	bash \
+	ncurses \
 	curl \
 	direnv \
 	git \
