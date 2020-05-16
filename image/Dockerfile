@@ -117,12 +117,12 @@ ENV RUSTUP_HOME=/rustup \
 	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
 RUN chmod +x /asuser.sh \
-	# Make accessible to owner only. We set the owner in entrypoint.
-	&& install -d -m 0700 -o root -g wheel /homedir/.ssh \
 	# For homedir, use the generic wheel group.
 	&& install -d -m 0755 -o root -g wheel /homedir \
 	&& setfacl -m g:wheel:rwX -R /homedir \
-	&& chmod g+rws /homedir
+	&& chmod g+rws /homedir \
+	# Make accessible to owner only. We set the owner in entrypoint.
+	&& install -d -m 0700 -o root -g wheel /homedir/.ssh
 
 WORKDIR /homedir
 
