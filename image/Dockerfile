@@ -10,6 +10,7 @@ RUN apk update \
 	shadow \
 	bash \
 	ncurses \
+	expect \
 	curl \
 	direnv \
 	git \
@@ -81,8 +82,8 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~ \
 	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& vim -S ~/.vim/plugin.lock -c 'qa' \
-	&& vim -c 'call gopher#system#setup()|qa' \
+	&& expect -c "spawn vim -S ~/.vim/plugin.lock -c 'qa'; expect eof" \
+	&& expect -c "spawn vim -S ~/.vim/gosetup.vim -c 'qa'; expect eof" \
 	&& sudo rm -rf ~/go/pkg
 
 # Development image.
