@@ -8,6 +8,15 @@ RUN apk update \
 	curl
 
 
+# earlyoom installation.
+FROM build-base AS dev-earlyoom
+
+RUN mkdir -p /tmp/earlyoom \
+	&& cd /tmp/earlyoom \
+	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
+	&& make
+
+
 # System packages.
 FROM build-base AS system-pkgs
 
@@ -28,15 +37,6 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	ctags \
 	fzf \
 	ripgrep
-
-
-# earlyoom installation.
-FROM build-base AS dev-earlyoom
-
-RUN mkdir -p /tmp/earlyoom \
-	&& cd /tmp/earlyoom \
-	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
-	&& make
 
 
 # Rust installation.
@@ -82,8 +82,15 @@ RUN adduser \
 
 USER builder
 
+# Install vim plug and set up yarn.
+RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
+	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
+	&& npm config set prefix /homedir/.npm-global \
+	&& npm install -g yarn
+
 ARG dot_commit
 
+# Install commit-locked vim plugins with go tools as a module.
 RUN mkdir -p /homedir/.local/share/chezmoi \
 	&& cd /homedir/.local/share/chezmoi \
 	&& git clone https://github.com/mgnsk/dotfiles.git . \
@@ -91,10 +98,6 @@ RUN mkdir -p /homedir/.local/share/chezmoi \
 	&& chezmoi apply \
 	&& rm -rf /homedir/.local/share/chezmoi \
 	&& cd /homedir \
-	&& curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
-	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& npm config set prefix /homedir/.npm-global \
-	&& npm install -g yarn \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
 	&& nvim --headless -S /homedir/.vim/plugin.lock -c 'qa'
@@ -116,13 +119,7 @@ ENV RUSTUP_HOME=/rustup \
 	GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
-RUN chmod +x /asuser.sh \
-	# For homedir, use the generic wheel group.
-	&& install -d -m 0755 -o root -g wheel /homedir \
-	&& setfacl -m g:wheel:rwX -R /homedir \
-	&& chmod g+rws /homedir \
-	# Make accessible to owner only. We set the owner in entrypoint.
-	&& install -d -m 0700 -o root -g wheel /homedir/.ssh
+RUN chmod +x /asuser.sh
 
 WORKDIR /homedir
 
