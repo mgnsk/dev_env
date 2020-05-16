@@ -33,8 +33,6 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 # earlyoom installation.
 FROM build-base AS dev-earlyoom
 
-RUN apk --no-cache add git 
-
 RUN mkdir -p /tmp/earlyoom \
 	&& cd /tmp/earlyoom \
 	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
@@ -67,7 +65,7 @@ RUN ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
 # User dotfiles and plugins.
 FROM build-base AS dev-home
 
-RUN apk --no-cache add git chezmoi curl neovim
+RUN apk --no-cache add chezmoi neovim
 
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=node-env /node /node
@@ -120,22 +118,10 @@ ENV RUSTUP_HOME=/rustup \
 
 RUN chmod +x /asuser.sh \
 	# Make accessible to owner only. We set the owner in entrypoint.
-	&& install -d -m 0700 -o root -g wheel \
-	/homedir/.ssh \
-	# For other dirs, use the generic wheel group.
-	install -d -m 0755 -o root -g wheel \
-	/homedir/.local \
-	/homedir/.cache \
-	/homedir/.config \
-	/homedir/.config/coc \
-	/homedir/.local/share/direnv \
-	&& setfacl -m g:wheel:rwX -R \
-	/homedir/.local \
-	/homedir/.cache \
-	/homedir/.config/coc \
-	# Make all new files created owned by wheel group.
-	# The umask 002 set in asuser.sh entrypoint makes
-	# sure that new files are group writable.
+	&& install -d -m 0700 -o root -g wheel /homedir/.ssh \
+	# For homedir, use the generic wheel group.
+	&& install -d -m 0755 -o root -g wheel /homedir \
+	&& setfacl -m g:wheel:rwX -R /homedir \
 	&& chmod g+rws /homedir
 
 WORKDIR /homedir
