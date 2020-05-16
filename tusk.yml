@@ -40,6 +40,12 @@ tasks:
         GROUP: ${group}
     - command: docker-compose run --rm --entrypoint /asuser.sh dev-env /bin/bash
 
+  root:
+    usage: Run a root shell in the container.
+    run:
+    - command: mkdir -p ./code
+    - command: docker-compose run --rm dev-env /bin/bash
+
   logs:
     run:
     - command: docker-compose logs -f -t --tail="all"

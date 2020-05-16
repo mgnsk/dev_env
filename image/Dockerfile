@@ -1,76 +1,67 @@
 # Base system.
-FROM archlinux AS system-base
+FROM alpine:edge AS system-base
 
-RUN pacman-key --init \
-	&& pacman-key --populate archlinux \
-	&& pacman -Syu --noconfirm
-
-# Install manually instead of base-devel.
-RUN pacman -S --needed --noconfirm \
+RUN apk update \
+	&& apk --no-cache upgrade \
+	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	build-base \
+	acl \
 	sudo \
-	fakeroot \
-	binutils \
-	make \
+	curl \
+	direnv \
 	git \
-	go \
-	rustup \
-	&& rm -rf /var/cache/pacman/pkg
-
-
-# Add the builder user.
-FROM system-base as builder-user
-
-RUN useradd -m -G wheel -s /bin/bash builder \
-	&& usermod -d /homedir -m builder \
-	&& echo "Defaults:builder !authenticate" >> /etc/sudoers \
-	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
-
-USER builder
-
-
-# Direnv installation.
-FROM builder-user AS direnv
-
-RUN mkdir -p /tmp/direnv \
-	&& cd /tmp/direnv \
-	&& git clone --depth 1 https://aur.archlinux.org/direnv.git . \
-	&& makepkg -si --noconfirm
-
-
-# Rust installation.
-FROM builder-user AS rust
-
-RUN rustup self upgrade-data \
-	&& rustup update stable \
-	&& rustup component add rls rust-analysis rust-src
-
-
-# Development packages
-FROM system-base AS dev-pkgs
-
-RUN pacman -S --needed --noconfirm \
 	tree \
 	most \
 	openssh \
-	earlyoom \
 	chezmoi \
 	vim \
 	neovim \
+	luajit \
 	nodejs \
 	npm \
 	yarn \
 	ctags \
 	fzf \
-	ripgrep \
-	&& rm -rf /var/cache/pacman/pkg
+	ripgrep
 
 
-# User configuration.
-FROM builder-user AS dev-home
+# Rust installation.
+FROM rust:alpine AS dev-rust
+
+RUN rustup component add rls rust-analysis rust-src
+
+
+# earlyoom installation.
+FROM system-base AS dev-earlyoom
+
+RUN mkdir -p /tmp/earlyoom \
+	&& cd /tmp/earlyoom \
+	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
+	&& make
+
+
+# User dotfiles and plugins.
+FROM system-base AS dev-home
+
+COPY --from=golang:alpine /usr/local/go /usr/local/go
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home /homedir \
+    --ingroup wheel \
+    builder \
+	&& echo "Defaults:builder !authenticate" >> /etc/sudoers \
+	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
+
+USER builder
 
 ARG dot_url
 
 ARG dot_commit
+
+ENV GOPATH=/homedir/go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir -p ~/.local/share/chezmoi \
 	&& cd ~/.local/share/chezmoi \
@@ -86,11 +77,13 @@ RUN mkdir -p ~/.local/share/chezmoi \
 
 
 # Development image.
-FROM dev-pkgs AS dev-env
+FROM system-base AS dev-env
 
-COPY --from=direnv /usr/bin/direnv /usr/bin/direnv
+COPY --from=dev-rust /usr/local/rustup /usr/local/rustup
+COPY --from=dev-rust /usr/local/cargo /usr/local/cargo
+COPY --from=golang:alpine /usr/local/go /usr/local/go
+COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
-COPY --from=rust --chown=root:wheel /homedir/.rustup /homedir/.rustup
 COPY ./asroot.sh /asroot.sh
 COPY ./asuser.sh /asuser.sh
 
@@ -113,6 +106,9 @@ RUN chmod +x /asroot.sh /asuser.sh \
 	# The umask 002 set in asuser.sh entrypoint makes
 	# sure that new files are group writable.
 	&& chmod g+rws /homedir
+
+ENV GOPATH /homedir/go
+ENV PATH $GOPATH/bin:/usr/local/go/bin:/usr/local/cargo/bin:$PATH
 
 WORKDIR /homedir
 
