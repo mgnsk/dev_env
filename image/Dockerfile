@@ -3,7 +3,9 @@ FROM alpine:edge AS build-base
 RUN apk update \
 	&& apk --no-cache upgrade \
 	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
-	build-base
+	build-base \
+	git \
+	curl
 
 
 # System packages.
@@ -15,9 +17,7 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	shadow \
 	bash \
 	ncurses \
-	curl \
 	direnv \
-	git \
 	tree \
 	most \
 	openssh \
