@@ -18,7 +18,6 @@ RUN apk update \
 	openssh \
 	chezmoi \
 	vim \
-	neovim \
 	luajit \
 	nodejs \
 	npm \
@@ -80,11 +79,11 @@ RUN mkdir -p ~/.local/share/chezmoi \
 	&& chezmoi apply \
 	&& rm -rf ~/.local/share/chezmoi \
 	&& cd ~ \
-	&& curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
+	&& curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& nvim --headless -S ~/.config/nvim/plugin.lock -c 'qa' \
+	&& vim -S ~/.vim/plugin.lock -c 'qa' \
+	&& vim -c 'call gopher#system#setup()|qa' \
 	&& sudo rm -rf ~/go/pkg
-
 
 # Development image.
 FROM system-base AS dev-env
