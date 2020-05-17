@@ -111,15 +111,17 @@ COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=node-env /node /node
 COPY --from=dev-rust /usr/local/cargo /cargo
 COPY --from=dev-rust /usr/local/rustup /rustup
-COPY --from=dev-home --chown=root:wheel /homedir /homedir
+COPY --from=dev-home /homedir /homedir
 COPY ./asuser.sh /asuser.sh
+COPY ./install_wheel.sh /install_wheel.sh
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
 	GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
-RUN chmod +x /asuser.sh
+RUN chmod +x /asuser.sh /install_wheel.sh \
+	&& bash /install_wheel.sh
 
 WORKDIR /homedir
 

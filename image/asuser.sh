@@ -22,17 +22,6 @@ addgroup $USER wheel
 echo "Defaults:${USER} !authenticate" >> /etc/sudoers
 echo "%${GROUP} ALL=(ALL) ALL" >> /etc/sudoers
 
-# Declare an array of string with type
-declare -a dirs=("/homedir/.local" "/homedir/.cache")
-
-# Set writable directories for user.
-for d in ${dirs[@]}; do
-	echo $d
-	install -d -m 0755 -o root -g wheel $d
-	setfacl -m g:wheel:rwX -R $d 
-	chmod g+rws $d
-done
-
 install -d -m 0700 -o $USER -g $GROUP /homedir/.ssh
 
 # This function prints each argument wrapped in single quotes
