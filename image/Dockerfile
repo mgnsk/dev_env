@@ -100,7 +100,8 @@ RUN mkdir -p /homedir/.local/share/chezmoi \
 	&& cd /homedir \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
-	&& nvim --headless -S /homedir/.vim/plugin.lock -c 'qa'
+	&& nvim --headless -u /homedir/.vim/plugins.vim -S /homedir/.vim/plugin.lock -c 'qa' \
+	&& nvim --headless -u /homedir/.vim/plugins.vim -c 'call gopher#system#setup()' -c 'qa'
 
 
 # Development image.
