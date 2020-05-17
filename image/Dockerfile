@@ -23,7 +23,6 @@ FROM build-base AS system-pkgs
 
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	acl \
-	sudo \
 	shadow \
 	bash \
 	ncurses \
