@@ -82,16 +82,15 @@ RUN adduser \
 
 USER builder
 
+ARG dot_commit
+
 # Install vim plug and set up yarn.
 RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
-	&& npm install -g yarn
-
-ARG dot_commit
-
-# Install commit-locked vim plugins with go tools as a module.
-RUN mkdir -p /homedir/.local/share/chezmoi \
+	&& npm install -g yarn \
+	# Install commit-locked vim plugins with go tools as a module.
+	&& mkdir -p /homedir/.local/share/chezmoi \
 	&& cd /homedir/.local/share/chezmoi \
 	&& git clone https://github.com/mgnsk/dotfiles.git . \
 	&& git checkout --quiet ${dot_commit} \
@@ -101,7 +100,8 @@ RUN mkdir -p /homedir/.local/share/chezmoi \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
 	&& nvim --headless -u /homedir/.vim/plugins.vim -S /homedir/.vim/plugin.lock -c 'qa' \
-	&& nvim --headless -u /homedir/.vim/plugins.vim -c 'call gopher#system#setup()' -c 'qa'
+	&& nvim --headless -u /homedir/.vim/plugins.vim -c 'call gopher#system#setup()' -c 'qa' \
+	&& sudo rm -rf /homedir/go/pkg
 
 
 # Development image.
