@@ -4,6 +4,7 @@ RUN apk update \
 	&& apk --no-cache upgrade \
 	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	build-base \
+	sudo \
 	git \
 	curl
 
@@ -62,8 +63,8 @@ RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm \
 	&& ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
 
 
-# User dotfiles and plugins.
-FROM build-base AS dev-home
+# Home directory builder.
+FROM build-base AS home-builder
 
 RUN apk --no-cache add chezmoi neovim
 
@@ -80,7 +81,14 @@ RUN adduser \
 	--ingroup wheel \
 	builder
 
+RUN echo "Defaults:builder !authenticate" >> /etc/sudoers \
+	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
+
 USER builder
+
+
+# User dotfiles and plugins.
+FROM home-builder AS dev-home
 
 ARG dot_commit
 
