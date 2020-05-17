@@ -3,7 +3,6 @@
 
 set -euo pipefail
 
-# Declare an array of string with type
 declare -a dirs=(
 	"/homedir/.config/coc"
 	"/homedir/.local"
