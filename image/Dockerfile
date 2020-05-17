@@ -58,8 +58,8 @@ FROM alpine:edge AS node-env
 
 COPY --from=dev-node /usr/local/bin/node /node/bin/node
 COPY --from=dev-node /usr/local/lib/node_modules /node/lib/node_modules
-RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm
-RUN ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
+RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm \
+	&& ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
 
 
 # User dotfiles and plugins.
