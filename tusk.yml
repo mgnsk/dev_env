@@ -2,7 +2,7 @@ tasks:
   build:
     options:
       dot_commit:
-        default: 813dc5e6724bdd7732f7e9a2bf76f7a6b256a178
+        default: ee5c597ec37a444e90041477813f9c9bea6a867b
     run:
     - command: >
         docker
