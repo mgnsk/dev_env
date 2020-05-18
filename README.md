@@ -12,12 +12,7 @@ All vim plugins are locked to git commits.
 
 `earlyoom` is started on each bash session.
 
-### Go
-
-[gopher.vim](https://github.com/arp242/gopher.vim) is used. It installs go tools by using a module.
-Everything is thus version-locked.
-
-### Tasks
+All plugins are installed with a lock file. [gopher.vim](https://github.com/arp242/gopher.vim) is used for its use of go modules for installation of tools.
 
 Build and run:
 
@@ -25,7 +20,6 @@ Build and run:
 
 `$ tusk bash`
  
-
  To download/update image, run:
 
 `$ tusk clean`
