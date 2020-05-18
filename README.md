@@ -8,11 +8,9 @@ Quick run
 The default entrypoint `/asroot.sh` runs as root.
 The `/asuser.sh` entrypoint creates a user and runs as it.
 
-All vim plugins are locked to git commits.
-
 `earlyoom` is started on each bash session.
 
-All plugins are installed with a lock file. [gopher.vim](https://github.com/arp242/gopher.vim) is used for its use of go modules for installation of tools.
+All plugins are locked to git commits. [gopher.vim](https://github.com/arp242/gopher.vim) is used for its use of go modules for installation of tools.
 
 Build and run:
 
