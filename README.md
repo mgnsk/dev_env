@@ -9,7 +9,10 @@ All plugins are locked to git commits. [gopher.vim](https://github.com/arp242/go
 
 #### Screenshot
 
-![Android tablet](screenshot.jpg)
+![Android tablet with Termius](screenshot.jpg)
+
+![Android tablet with Termux](screenshot2.jpg)
+
 
 #### Entrypoint
 
