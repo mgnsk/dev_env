@@ -96,7 +96,7 @@ RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
-	&& chezmoi init --apply --verbose https://github.com/mgnsk/dotfiles.git \
+	&& chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
 	&& cd /homedir \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
