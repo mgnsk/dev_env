@@ -4,7 +4,6 @@ volumes:
   ssh-key:
   coc-data:
   direnv-allow-cache:
-  go-tools:
 
 services:
   dev-env:
@@ -20,6 +19,5 @@ services:
     - ssh-key:/homedir/.ssh
     - coc-data:/homedir/.config/coc
     - direnv-allow-cache:/homedir/.local/share/direnv
-    - go-tools:/homedir/.vim/plugged/gopher.vim/tools/bin
     - ./code:/code
 
