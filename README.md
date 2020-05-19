@@ -9,8 +9,10 @@ All plugins are locked to git commits. [gopher.vim](https://github.com/arp242/go
 
 #### Screenshot
 
+Running on cloud server:
 ![Android tablet with Termius](screenshot.jpg)
 
+Local tablet environment works as well using Termux:
 ![Android tablet with Termux](screenshot2.jpg)
 
 
