@@ -17,3 +17,5 @@ for d in ${dirs[@]}; do
 	chmod g+rws $d
 done
 
+echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+

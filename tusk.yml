@@ -56,7 +56,14 @@ tasks:
         args:
           - dev-env_direnv-allow-cache
     - command: >
-        docker run --rm -it
+        docker run
+        --rm
+        --cap-drop=ALL
+        --cap-add=CAP_SETUID
+        --cap-add=CAP_SETGID
+        --cap-add=CAP_FOWNER
+        --cap-add=CAP_CHOWN
+        -it
         --entrypoint /asuser.sh
         --hostname dev-env
         -e UID=${uid}

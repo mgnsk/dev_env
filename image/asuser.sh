@@ -19,9 +19,6 @@ adduser \
 
 addgroup $USER wheel
 
-echo "Defaults:${USER} !authenticate" >> /etc/sudoers
-echo "%${GROUP} ALL=(ALL) ALL" >> /etc/sudoers
-
 install -d -m 0700 -o $USER -g $GROUP /homedir/.ssh
 
 # This function prints each argument wrapped in single quotes
