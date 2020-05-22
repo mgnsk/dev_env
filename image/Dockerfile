@@ -89,12 +89,17 @@ USER builder
 # User dotfiles and plugins.
 FROM home-builder AS dev-home
 
+ARG dot_commit
+
 # Install vim plug and set up yarn.
 RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
-	&& chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
+	&& chezmoi init https://github.com/mgnsk/dotfiles.git \
+	&& cd /homedir/.local/share/chezmoi \
+	&& git checkout ${dot_commit} \
+	&& chezmoi apply \
 	&& cd /homedir \
 	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \

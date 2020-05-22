@@ -1,3 +1,7 @@
+options:
+  dot_commit:
+    default: 1f5e02f4f46b9fc7ed8ef782300a603347175117
+
 tasks:
   build:
     run:
@@ -5,6 +9,7 @@ tasks:
         docker
         build
         --pull
+        --build-arg dot_commit=${dot_commit}
         -t mgnsk/dev-env:latest
         ./image
 

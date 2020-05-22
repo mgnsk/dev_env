@@ -9,9 +9,7 @@ All plugins are locked to git commits. [gopher.vim](https://github.com/arp242/go
 
 #### Screenshot
 
-![Syntax theme](syntax.png)
-
-When manually set up, also runs on Termux:
+Running on Termux:
 ![Android tablet with Termux running Vim](screenshot2.jpg)
 
 
