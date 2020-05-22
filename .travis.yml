@@ -1,0 +1,9 @@
+services:
+- docker
+
+before_install:
+- curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
+- tusk build
+- echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
+- docker push mgnsk/dev-env:latest
+
