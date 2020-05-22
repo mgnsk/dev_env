@@ -13,8 +13,7 @@ tasks:
         -t mgnsk/dev-env:latest
         ./image
 
-
-  create_volume:
+  _create-volume:
     usage: Create a volume if not exists.
     private: yes
     args:
@@ -45,15 +44,15 @@ tasks:
     run:
     - command: mkdir -p ./code
     - task:
-        name: create_volume
+        name: _create-volume
         args:
           - dev-env_ssh-key
     - task:
-        name: create_volume
+        name: _create-volume
         args:
           - dev-env_coc-data
     - task:
-        name: create_volume
+        name: _create-volume
         args:
           - dev-env_direnv-allow-cache
     - command: >
