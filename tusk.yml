@@ -13,6 +13,19 @@ tasks:
         -t mgnsk/dev-env:latest
         ./image
 
+
+  create_volume:
+    usage: Create a volume if not exists.
+    private: yes
+    args:
+      name:
+        usage: Volume name
+    run:
+      command: >
+        if ! docker volume ls | awk 'NR!=1 { print $2 }' | grep -q ${name}; then
+          docker volume create ${name}
+        fi
+
   bash:
     usage: Run a bash shell as host user user.
     description: The user is created and permissions set on entry.
@@ -31,12 +44,34 @@ tasks:
           command: id -gn
     run:
     - command: mkdir -p ./code
-    - set-environment:
-        UID: ${uid}
-        USER: ${user}
-        GID: ${gid}
-        GROUP: ${group}
-    - command: docker-compose run --rm --entrypoint /asuser.sh dev-env /bin/bash
+    - task:
+        name: create_volume
+        args:
+          - dev-env_ssh-key
+    - task:
+        name: create_volume
+        args:
+          - dev-env_coc-data
+    - task:
+        name: create_volume
+        args:
+          - dev-env_direnv-allow-cache
+    - command: >
+        docker run --rm -it
+        --name dev-env
+        --entrypoint /asuser.sh
+        --hostname dev-env
+        -e UID=${uid}
+        -e USER=${user}
+        -e GID=${gid}
+        -e GROUP=${group}
+        -w /code
+        --mount type=bind,source="$(pwd)/code",target=/code
+        --mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
+        --mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
+        --mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
+        mgnsk/dev-env
+        /bin/bash
 
   root:
     usage: Run a root shell in the container.
