@@ -57,7 +57,6 @@ tasks:
           - dev-env_direnv-allow-cache
     - command: >
         docker run --rm -it
-        --name dev-env
         --entrypoint /asuser.sh
         --hostname dev-env
         -e UID=${uid}
@@ -71,12 +70,6 @@ tasks:
         --mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
         mgnsk/dev-env
         /bin/bash
-
-  root:
-    usage: Run a root shell in the container.
-    run:
-    - command: mkdir -p ./code
-    - command: docker-compose run --rm dev-env /bin/bash
 
   logs:
     run:
