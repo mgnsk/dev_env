@@ -12,7 +12,6 @@ All plugins and tools are version-locked.
 Running on Termux:
 ![Android tablet with Termux running Vim](screenshot2.jpg)
 
-
 #### Entrypoint
 
 The `/asuser.sh` entrypoint creates a user and runs as it.
