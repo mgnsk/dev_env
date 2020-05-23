@@ -5,7 +5,7 @@ before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
 script:
 - "./.direnv/bin/tusk build"
-- echo "$DOCKER_LOGIN" | docker login -u mgnsk --password-stdin
+- echo $DOCKER_LOGIN | docker login -u mgnsk --password-stdin
 - docker push mgnsk/dev-env:latest
 env:
   global:
