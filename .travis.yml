@@ -1,13 +1,12 @@
 language: minimal
-
 services:
 - docker
-
 before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
-
 script:
-- ./.direnv/bin/tusk build
+- "./.direnv/bin/tusk build"
 - echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
 - docker push mgnsk/dev-env:latest
-
+env:
+  global:
+    secure: ELG9+oz7w+il+3WZ7mmkCFv/dVWzZQ9nLzUInGJbaub3HUMf6CwXp5PNCDI1jQojZJx5880+m/dXRQ6ZarSVFDG3z0Ww5HUrrkthrRzF+/6ag/HPFPtbVJUXH7libeAU6S6GTI3IJY7HruaZ3l+WLtwMN9m3aX4iA0MUAhSf8J4MwNgNQxB1IRKt2ic6RgtKFYJ2wkAD36Uk4MN/qR7S/ojV2MP7pFgmB34yDIWOynubEXYfnY7UTyLYLwtj8Ouj8zupZV1UJ6SW7iZHUjKpcllsWCaAkKDvMPIDckn/u+Oylcs0kOKlJg96r3xKuKlFsLQZ8PsfAC50agZBpCH/bN/RbDjttCeceAaswLLhuEgapLPLboXddrZK43JbY0IeiDSedybH4M1kOhTp559edv6/hHcjuXO8IprWR8hm9WeHx9DmkpiSIDONeVYG/1tl+WdY6rZcnbGEGUlwEA1OxZENgDyFb9RZU9i4ye25uweFtukfjwjua+QjfSq6U3CPyyEih7/2Mcbcwra0p15dsLhYeIdI98u1cJ6qzylzsGudRxCe/Wo9RysSlIr4LCdLSvPH7cDx94dpIbKfLQQRSFLlISaIIuH41nVSjnEkjB/p5KjTp3gxX/QaBxz6zX6zysvhV1wYPlOOQQ28bHoQHhul0NLqupONBjKSQepEZWA=
