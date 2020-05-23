@@ -78,7 +78,7 @@ tasks:
         --mount type=bind,source="$(pwd)/code",target=/code
         --mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
         --mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
-        --mount type=volume,source=dev-env_nvim-shada,target=/homedir/.local/share/nvim
+        --mount type=volume,source=dev-env_nvim-shada,target=/homedir/.local/share/nvim/shada
         --mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
         mgnsk/dev-env
         /bin/bash
