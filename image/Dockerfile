@@ -30,7 +30,7 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	direnv \
 	tree \
 	most \
-	openssh \
+	openssh-client \
 	chezmoi \
 	vim \
 	neovim \
