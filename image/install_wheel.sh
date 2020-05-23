@@ -5,7 +5,7 @@ set -euo pipefail
 
 declare -a dirs=(
 	"/homedir/.config/coc"
-	"/homedir/.local"
+	"/homedir/.local/share/nvim"
 	"/homedir/.local/share/direnv"
 	"/homedir/.cache"
 )

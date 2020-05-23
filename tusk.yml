@@ -54,6 +54,10 @@ tasks:
     - task:
         name: _create-volume
         args:
+          - dev-env_nvim-shada
+    - task:
+        name: _create-volume
+        args:
           - dev-env_direnv-allow-cache
     - command: >
         docker run
@@ -74,6 +78,7 @@ tasks:
         --mount type=bind,source="$(pwd)/code",target=/code
         --mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
         --mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
+        --mount type=volume,source=dev-env_nvim-shada,target=/homedir/.local/share/nvim
         --mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
         mgnsk/dev-env
         /bin/bash
