@@ -90,16 +90,7 @@ FROM home-builder AS dev-home
 
 ARG dot_commit
 
-# Install vim plug and set up yarn.
-RUN chgrp -R wheel /homedir \
-	&& chmod -R g+rwXs /homedir \
-	&& umask 002; \
-	mkdir -p \
-	/homedir/.config/coc \
-	/homedir/.local/share/nvim \
-	/homedir/.local/share/direnv \
-	/homedir/.cache \
-	&& curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
+RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
@@ -112,7 +103,14 @@ RUN chgrp -R wheel /homedir \
 	&& ln -s /homedir/.vim /homedir/.config/nvim \
 	&& nvim --headless -u /homedir/.vim/plugins.vim -S /homedir/.vim/plugin.lock -c 'qa' \
 	&& nvim --headless -u /homedir/.vim/plugins.vim -c 'call gopher#system#setup()' -c 'qa' \
-	&& sudo rm -rf /homedir/go/pkg
+	&& sudo rm -rf \
+	/homedir/go/pkg \
+	/homedir/.local/share/nvim \
+	&& mkdir -p \
+	/homedir/.config/coc \
+	/homedir/.local/share/nvim \
+	/homedir/.local/share/direnv \
+	/homedir/.cache
 
 
 # Development image.
