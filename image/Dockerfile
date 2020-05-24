@@ -90,7 +90,10 @@ FROM home-builder AS dev-home
 
 ARG dot_commit
 
-RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
+RUN chgrp -R wheel /homedir \
+	&& chmod g+s /homedir \
+	&& umask 002; \
+	curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
