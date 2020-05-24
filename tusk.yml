@@ -87,3 +87,8 @@ tasks:
     run:
     - command: docker rmi mgnsk/dev-env
 
+  push:
+    run:
+      command: |
+        echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
+        docker push mgnsk/dev-env:latest
