@@ -7,7 +7,8 @@ RUN apk update \
 	coreutils \
 	sudo \
 	git \
-	curl
+	curl \
+	&& echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 
 # earlyoom installation.
@@ -81,9 +82,6 @@ RUN adduser \
 	--ingroup wheel \
 	builder
 
-RUN echo "Defaults:builder !authenticate" >> /etc/sudoers \
-	&& echo "%wheel ALL=(ALL) ALL" >> /etc/sudoers
-
 USER builder
 
 
@@ -93,8 +91,15 @@ FROM home-builder AS dev-home
 ARG dot_commit
 
 # Install vim plug and set up yarn.
-RUN umask 002; \
-	curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
+RUN chgrp -R wheel /homedir \
+	&& chmod -R g+rwXs /homedir \
+	&& umask 002; \
+	mkdir -p \
+	/homedir/.config/coc \
+	/homedir/.local/share/nvim \
+	/homedir/.local/share/direnv \
+	/homedir/.cache \
+	&& curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
@@ -120,15 +125,11 @@ COPY --from=dev-rust /usr/local/cargo /cargo
 COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home /homedir /homedir
 COPY ./asuser.sh /asuser.sh
-COPY ./install_wheel.sh /install_wheel.sh
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
 	GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
-
-RUN chmod +x /asuser.sh /install_wheel.sh \
-	&& bash /install_wheel.sh
 
 WORKDIR /homedir
 
