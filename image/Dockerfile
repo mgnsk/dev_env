@@ -90,10 +90,7 @@ FROM home-builder AS dev-home
 
 ARG dot_commit
 
-RUN chgrp -R wheel /homedir \
-	&& chmod -R g+rwXs /homedir \
-	&& umask 002; \
-	curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
+RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
 	&& npm config set prefix /homedir/.npm-global \
 	&& npm install -g yarn \
@@ -124,7 +121,7 @@ COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=node-env /node /node
 COPY --from=dev-rust /usr/local/cargo /cargo
 COPY --from=dev-rust /usr/local/rustup /rustup
-COPY --from=dev-home /homedir /homedir
+COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY ./asuser.sh /asuser.sh
 
 RUN mkdir /code && setfacl -m g:wheel:rwX /code
