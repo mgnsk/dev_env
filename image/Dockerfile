@@ -110,7 +110,8 @@ RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	/homedir/.config/coc \
 	/homedir/.local/share/nvim \
 	/homedir/.local/share/direnv \
-	/homedir/.cache
+	/homedir/.cache \
+	&& chmod -R g+rwXs /homedir
 
 
 # Development image.
@@ -124,9 +125,7 @@ COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY ./asuser.sh /asuser.sh
 
-RUN mkdir /code \
-	&& setfacl -m g:wheel:rwX /code \
-	&& chmod -R g+rwXs /homedir
+RUN mkdir /code && setfacl -m g:wheel:rwX /code
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
