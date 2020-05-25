@@ -91,7 +91,7 @@ FROM home-builder AS dev-home
 ARG dot_commit
 
 RUN chgrp -R wheel /homedir \
-	&& chmod -R g+s /homedir \
+	&& chmod -R g+rwXs /homedir \
 	&& umask 002; \
 	curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
