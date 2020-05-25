@@ -124,7 +124,9 @@ COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY ./asuser.sh /asuser.sh
 
-RUN mkdir /code && setfacl -m g:wheel:rwX /code
+RUN mkdir /code \
+	&& setfacl -m g:wheel:rwX /code \
+	&& chmod -R g+rwXs wheel /homedir
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
