@@ -87,6 +87,13 @@ tasks:
     run:
     - command: docker rmi mgnsk/dev-env
 
+  prune-volumes:
+    run:
+    - command: docker volume rm dev-env_ssh-key || true
+    - command: docker volume rm dev-env_coc-data || true
+    - command: docker volume rm dev-env_nvim-data || true
+    - command: docker volume rm dev-env_direnv-allow-cache || true
+
   push:
     run:
       command: |

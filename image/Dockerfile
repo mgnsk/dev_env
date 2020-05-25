@@ -91,7 +91,7 @@ FROM home-builder AS dev-home
 ARG dot_commit
 
 RUN chgrp -R wheel /homedir \
-	&& chmod g+s /homedir \
+	&& chmod -R g+s /homedir \
 	&& umask 002; \
 	curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
 	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
@@ -126,6 +126,8 @@ COPY --from=dev-rust /usr/local/cargo /cargo
 COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home /homedir /homedir
 COPY ./asuser.sh /asuser.sh
+
+RUN mkdir /code && setfacl -m g:wheel:rwX /code
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
