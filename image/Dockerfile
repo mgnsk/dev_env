@@ -126,7 +126,7 @@ COPY ./asuser.sh /asuser.sh
 
 RUN mkdir /code \
 	&& setfacl -m g:wheel:rwX /code \
-	&& chmod -R g+rwXs wheel /homedir
+	&& chmod -R g+rwXs /homedir
 
 ENV RUSTUP_HOME=/rustup \
     CARGO_HOME=/cargo \
