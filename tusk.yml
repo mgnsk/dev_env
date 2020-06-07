@@ -1,6 +1,6 @@
 options:
   dot_commit:
-    default: 080ef34efee5370f265a8a8b1cec9c64421ff631
+    default: 5a07b6cd6ba1ca0b608a45e356ce6690df3c0c35
 
 tasks:
   build:
@@ -13,18 +13,6 @@ tasks:
         --build-arg dot_commit=${dot_commit}
         -t mgnsk/dev-env:latest
         ./image
-
-  _create-volume:
-    usage: Create a volume if not exists.
-    private: yes
-    args:
-      name:
-        usage: Volume name
-    run:
-      command: >
-        if ! docker volume ls | awk 'NR!=1 { print $2 }' | grep -q ${name}; then
-          docker volume create ${name}
-        fi
 
   bash:
     usage: Run a bash shell as host user user.
@@ -44,22 +32,12 @@ tasks:
           command: id -gn
     run:
     - command: mkdir -p ./code
-    - task:
-        name: _create-volume
-        args:
-          - dev-env_ssh-key
-    - task:
-        name: _create-volume
-        args:
-          - dev-env_coc-data
-    - task:
-        name: _create-volume
-        args:
-          - dev-env_nvim-data
-    - task:
-        name: _create-volume
-        args:
-          - dev-env_direnv-allow-cache
+    - command: >
+        ./create_volumes.sh
+        dev-env_ssh-key
+        dev-env_coc-data
+        dev-env_nvim-data
+        dev-env_direnv-allow-cache
     - command: >
         docker run
         --rm
