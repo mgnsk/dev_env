@@ -1,6 +1,6 @@
 options:
   dot_commit:
-    default: 5a07b6cd6ba1ca0b608a45e356ce6690df3c0c35
+    default: 4956ff81ff35bb18520fbfc7c8cee7e4b3f3840d
 
 tasks:
   build:
