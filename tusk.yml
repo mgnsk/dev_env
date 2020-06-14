@@ -1,6 +1,6 @@
 options:
   dot_commit:
-    default: 4956ff81ff35bb18520fbfc7c8cee7e4b3f3840d
+    default: 26e6993af9c2d0c60071c784cbfb6c031fb8b7a2
   cmd:
     default: podman
 
@@ -36,6 +36,7 @@ tasks:
     - command: mkdir -p ./code
     - set-environment:
         CMD: ${cmd}
+        PODMAN_USERNS: keep-id
     - command: >
         ./create_volumes.sh
         dev-env_ssh-key

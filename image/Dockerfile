@@ -5,6 +5,7 @@ RUN apk update \
 	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	build-base \
 	coreutils \
+	bash \
 	sudo \
 	git \
 	curl \
@@ -26,13 +27,13 @@ FROM build-base AS system-pkgs
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	acl \
 	shadow \
-	bash \
 	ncurses \
 	direnv \
 	tree \
 	most \
 	openssh-client \
 	chezmoi \
+	tmux \
 	vim \
 	neovim \
 	luajit \
@@ -91,19 +92,12 @@ FROM home-builder AS dev-home
 
 ARG dot_commit
 
-RUN curl -fLo /homedir/.vim/autoload/plug.vim --create-dirs \
-	https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-	&& npm config set prefix /homedir/.npm-global \
-	&& npm install -g yarn \
-	&& chezmoi init https://github.com/mgnsk/dotfiles.git \
+RUN chezmoi init https://github.com/mgnsk/dotfiles.git \
 	&& cd /homedir/.local/share/chezmoi \
 	&& git checkout ${dot_commit} \
 	&& chezmoi apply \
 	&& cd /homedir \
-	&& ln -s /homedir/.vimrc /homedir/.vim/init.vim \
-	&& ln -s /homedir/.vim /homedir/.config/nvim \
-	&& nvim --headless -u /homedir/.vim/plugins.vim -S /homedir/.vim/plugin.lock -c 'qa' \
-	&& nvim --headless -u /homedir/.vim/plugins.vim -c 'call gopher#system#setup()' -c 'qa' \
+	&& bash setup.sh \
 	&& sudo rm -rf \
 	/homedir/go/pkg \
 	/homedir/.local/share/nvim \
@@ -126,12 +120,14 @@ COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home --chown=root:wheel /homedir /homedir
 COPY ./asuser.sh /asuser.sh
 
-RUN mkdir /code && setfacl -m g:wheel:rwX /code
+RUN mkdir /code
 
-ENV RUSTUP_HOME=/rustup \
-    CARGO_HOME=/cargo \
+ENV	RUSTUP_HOME=/rustup \
+	CARGO_HOME=/cargo \
 	GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
 WORKDIR /homedir
 
+# setfacl on runtime.
+CMD setfacl -m g:wheel:rwX /code
