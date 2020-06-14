@@ -130,4 +130,4 @@ ENV	RUSTUP_HOME=/rustup \
 WORKDIR /homedir
 
 # setfacl on runtime.
-CMD setfacl -m g:wheel:rwX /code
+CMD setfacl -R -m g:wheel:rwX /code

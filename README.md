@@ -19,7 +19,7 @@ Running on Termux:
 The `/asuser.sh` entrypoint creates a user and runs as it.
 
 `earlyoom` is started on each bash session.
-Build and run:
+Build and run (all commands take `--cmd [docker|podman]` with `podman` as the default.
 
 `$ tusk build`
 
