@@ -1,12 +1,14 @@
 options:
   dot_commit:
-    default: 4956ff81ff35bb18520fbfc7c8cee7e4b3f3840d
+    default: a2286223090532755db2ef6e5cdbd7c54e2c00ee
+  cmd:
+    default: podman
 
 tasks:
   build:
     run:
     - command: >
-        docker
+        ${cmd}
         build
         --pull
         --squash
@@ -32,6 +34,9 @@ tasks:
           command: id -gn
     run:
     - command: mkdir -p ./code
+    - set-environment:
+        CMD: ${cmd}
+        PODMAN_USERNS: keep-id
     - command: >
         ./create_volumes.sh
         dev-env_ssh-key
@@ -39,7 +44,8 @@ tasks:
         dev-env_nvim-data
         dev-env_direnv-allow-cache
     - command: >
-        docker run
+        ${cmd}
+        run
         --rm
         --cap-drop=ALL
         --cap-add=CAP_SETUID
@@ -64,17 +70,17 @@ tasks:
 
   clean:
     run:
-    - command: docker rmi mgnsk/dev-env
+    - command: ${cmd} rmi mgnsk/dev-env
 
   prune-volumes:
     run:
-    - command: docker volume rm dev-env_ssh-key || true
-    - command: docker volume rm dev-env_coc-data || true
-    - command: docker volume rm dev-env_nvim-data || true
-    - command: docker volume rm dev-env_direnv-allow-cache || true
+    - command: ${cmd} volume rm dev-env_ssh-key || true
+    - command: ${cmd} volume rm dev-env_coc-data || true
+    - command: ${cmd} volume rm dev-env_nvim-data || true
+    - command: ${cmd} volume rm dev-env_direnv-allow-cache || true
 
   push:
     run:
       command: |
-        echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
-        docker push mgnsk/dev-env:latest
+        echo "$DOCKER_TOKEN" | ${cmd} login -u mgnsk --password-stdin
+        ${cmd} push mgnsk/dev-env:latest
