@@ -1,6 +1,6 @@
 options:
   dot_commit:
-    default: 26e6993af9c2d0c60071c784cbfb6c031fb8b7a2
+    default: a2286223090532755db2ef6e5cdbd7c54e2c00ee
   cmd:
     default: podman
 
