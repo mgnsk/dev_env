@@ -9,6 +9,7 @@ RUN apk update \
 	sudo \
 	git \
 	curl \
+	tmux \
 	&& echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 
@@ -33,7 +34,6 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	most \
 	openssh-client \
 	chezmoi \
-	tmux \
 	vim \
 	neovim \
 	luajit \
@@ -97,6 +97,7 @@ RUN chezmoi init https://github.com/mgnsk/dotfiles.git \
 	&& git checkout ${dot_commit} \
 	&& chezmoi apply \
 	&& cd /homedir \
+	&& cat setup.sh \
 	&& bash setup.sh \
 	&& sudo rm -rf \
 	/homedir/go/pkg \

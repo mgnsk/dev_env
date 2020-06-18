@@ -1,6 +1,6 @@
 options:
   dot_commit:
-    default: a934c47c05df45d715d8f16fea8db57261bc822b
+    default: a2abf576fd57c86861d3ec7eb7cffb9e1c4735bd
   cmd:
     default: podman
 
@@ -43,6 +43,7 @@ tasks:
         dev-env_coc-data
         dev-env_nvim-data
         dev-env_direnv-allow-cache
+        dev-env_tmux-resurrect
     - command: >
         ${cmd}
         run
@@ -65,6 +66,7 @@ tasks:
         --mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
         --mount type=volume,source=dev-env_nvim-data,target=/homedir/.local/share/nvim
         --mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
+        --mount type=volume,source=dev-env_tmux-resurrect,target=/homedir/.tmux/resurrect
         mgnsk/dev-env
         /bin/bash
 
