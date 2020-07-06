@@ -31,7 +31,7 @@ tasks:
     - command: mkdir -p ./code
     # Give the container GID 3000 write permissions to host directory.
     # Assuming /etc/subgid is set up to map host GID 100000 to container GID 0.
-    - command: sudo setfacl -R -m g:103000:rwX ./code
+    - command: setfacl -R -m g:103000:rwX ./code
     #- command: >
         #./create_volumes.sh
         #dev-env_ssh-key
