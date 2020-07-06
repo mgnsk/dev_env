@@ -26,8 +26,6 @@ RUN mkdir -p /tmp/earlyoom \
 FROM build-base AS system-pkgs
 
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
-	acl \
-	shadow \
 	ncurses \
 	direnv \
 	tree \
@@ -43,10 +41,10 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	ripgrep
 
 
-# Rust installation.
-FROM rust:alpine AS dev-rust
+## Rust installation.
+#FROM rust:alpine AS dev-rust
 
-RUN rustup component add rls rust-analysis rust-src
+#RUN rustup component add rls rust-analysis rust-src
 
 
 # Go installation.
@@ -97,7 +95,6 @@ RUN chezmoi init https://github.com/mgnsk/dotfiles.git \
 	&& git checkout ${dot_commit} \
 	&& chezmoi apply \
 	&& cd /homedir \
-	&& cat setup.sh \
 	&& bash setup.sh \
 	&& sudo rm -rf \
 	/homedir/go/pkg \
@@ -113,22 +110,40 @@ RUN chezmoi init https://github.com/mgnsk/dotfiles.git \
 # Development image.
 FROM system-pkgs AS dev-env
 
+ARG UID
+ARG GID
+ARG USER
+ARG GROUP
+
+RUN addgroup -g ${GID} ${GROUP} \
+	&& groupmod -g ${GID} ${GROUP} \
+	&& adduser \
+	--disabled-password \
+	--gecos "" \
+	--home /homedir \
+	--ingroup ${GROUP} \
+	--uid ${UID} \
+	${USER} \
+	&& addgroup ${USER} wheel
+
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=node-env /node /node
-COPY --from=dev-rust /usr/local/cargo /cargo
-COPY --from=dev-rust /usr/local/rustup /rustup
-COPY --from=dev-home --chown=root:wheel /homedir /homedir
-COPY ./asuser.sh /asuser.sh
+#COPY --from=dev-rust /usr/local/cargo /cargo
+#COPY --from=dev-rust /usr/local/rustup /rustup
+COPY --from=dev-home --chown=user:user /homedir /homedir
 
-RUN mkdir /code
+
+VOLUME /code
+VOLUME /scripts
+
+WORKDIR /homedir
 
 ENV	RUSTUP_HOME=/rustup \
 	CARGO_HOME=/cargo \
 	GOPATH=/homedir/go \
 	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
 
-WORKDIR /homedir
+USER user
 
-# setfacl on runtime.
-CMD setfacl -R -m g:wheel:rwX /code
+CMD ["earlyoom"]

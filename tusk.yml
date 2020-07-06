@@ -2,11 +2,11 @@ options:
   dot_commit:
     default: 0c43147a46eba9e334e5300c7b7297409f0e7f8a
 
-  cmd:
-    default: podman
-
 tasks:
   build:
+    options:
+      cmd:
+        default: podman
     run:
     - command: >
         ${cmd}
@@ -14,76 +14,65 @@ tasks:
         --pull
         --squash
         --build-arg dot_commit=${dot_commit}
+        --build-arg UID=3000
+        --build-arg GID=3000
+        --build-arg USER=user
+        --build-arg GROUP=user
         -t mgnsk/dev-env:latest
         ./image
 
   bash:
-    usage: Run a bash shell as host user user.
-    description: The user is created and permissions set on entry.
+    usage: Run bash shell as a non-root user.
     options:
       uid:
         default:
           command: id -u
-      user:
-        default:
-          command: id -un
-      gid:
-        default:
-          command: id -g
-      group:
-        default:
-          command: id -gn
     run:
     - command: mkdir -p ./code
-    - set-environment:
-        CMD: ${cmd}
-        PODMAN_USERNS: keep-id
+    # Give the container GID 3000 write permissions to host directory.
+    # Assuming /etc/subgid is set up to map host GID 100000 to container GID 0.
+    - command: sudo setfacl -R -m g:103000:rwX ./code
+    #- command: >
+        #./create_volumes.sh
+        #dev-env_ssh-key
+        #dev-env_coc-data
+        #dev-env_nvim-data
+        #dev-env_direnv-allow-cache
+        #dev-env_tmux-resurrect
     - command: >
-        ./create_volumes.sh
-        dev-env_ssh-key
-        dev-env_coc-data
-        dev-env_nvim-data
-        dev-env_direnv-allow-cache
-        dev-env_tmux-resurrect
-    - command: >
-        ${cmd}
+        podman
         run
         --rm
         --cap-drop=ALL
-        --cap-add=CAP_SETUID
-        --cap-add=CAP_SETGID
-        --cap-add=CAP_FOWNER
-        --cap-add=CAP_CHOWN
-        -it
-        --entrypoint /asuser.sh
-        --hostname dev-env
-        -e UID=${uid}
-        -e USER=${user}
-        -e GID=${gid}
-        -e GROUP=${group}
-        -w /code
+        --runtime crun
+        --memory 2g
+        --userns=auto:uidmapping=${uid}:3000:4000
         --mount type=bind,source="$(pwd)/code",target=/code
-        --mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
-        --mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
-        --mount type=volume,source=dev-env_nvim-data,target=/homedir/.local/share/nvim
-        --mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
-        --mount type=volume,source=dev-env_tmux-resurrect,target=/homedir/.tmux/resurrect
+        --hostname dev-env
+        -it
         mgnsk/dev-env
         /bin/bash
-
+        # TODO volumes not working
+        #--mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
+        #--mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
+        #--mount type=volume,source=dev-env_nvim-data,target=/homedir/.local/share/nvim
+        #--mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
+        #--mount type=volume,source=dev-env_tmux-resurrect,target=/homedir/.tmux/resurrect
   clean:
     run:
-    - command: ${cmd} rmi mgnsk/dev-env
+    - command: podman rmi mgnsk/dev-env
 
   prune-volumes:
     run:
-    - command: ${cmd} volume rm dev-env_ssh-key || true
-    - command: ${cmd} volume rm dev-env_coc-data || true
-    - command: ${cmd} volume rm dev-env_nvim-data || true
-    - command: ${cmd} volume rm dev-env_direnv-allow-cache || true
+    - command: podman volume rm dev-env_ssh-key || true
+    - command: podman volume rm dev-env_coc-data || true
+    - command: podman volume rm dev-env_nvim-data || true
+    - command: podman volume rm dev-env_direnv-allow-cache || true
+    - command: podman volume rm dev-env_tmux-resurrect || true
 
   push:
+    usage: Push from docker CI.
     run:
       command: |
-        echo "$DOCKER_TOKEN" | ${cmd} login -u mgnsk --password-stdin
-        ${cmd} push mgnsk/dev-env:latest
+        echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
+        docker push mgnsk/dev-env:latest
