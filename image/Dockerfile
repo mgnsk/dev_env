@@ -7,6 +7,7 @@ RUN apk update \
 	coreutils \
 	bash \
 	sudo \
+	shadow \
 	git \
 	curl \
 	tmux \
