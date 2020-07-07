@@ -93,7 +93,7 @@ ARG dot_commit
 
 RUN chezmoi init https://github.com/mgnsk/dotfiles.git \
 	&& cd /homedir/.local/share/chezmoi \
-	&& git checkout ${dot_commit} \
+	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
 	&& cd /homedir \
 	&& bash setup.sh \
@@ -134,9 +134,7 @@ COPY --from=dev-rust /usr/local/cargo /cargo
 COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home --chown=user:user /homedir /homedir
 
-
 VOLUME /code
-VOLUME /scripts
 
 WORKDIR /homedir
 
