@@ -27,11 +27,21 @@ tasks:
       uid:
         default:
           command: id -u
+      gid:
+        default:
+          command: id -g
+
     run:
+    # Create the code directory. Files created by the container will be owned by the host group on the host.
+    # The container is run with umask 002 so files created by the container are group-writable on the host.
+    # Files created by the host must have ACL applied to be writable by the container.
     - command: mkdir -p ./code
-    # Give the container GID 3000 write permissions to host directory.
+    - command: chgrp +${gid} ./code
+    - command: chmod g+s ./code
+    # Give the container GID 3000 write permissions.
     # Assuming /etc/subgid is set up to map host GID 100000 to container GID 0.
-    - command: setfacl -R -m g:103000:rwX ./code
+    # Sudo is needed for files created by the container.
+    - command: sudo setfacl -Rm g:103000:rwX ./code
     #- command: >
         #./create_volumes.sh
         #dev-env_ssh-key
@@ -51,7 +61,8 @@ tasks:
         --hostname dev-env
         -it
         mgnsk/dev-env
-        /bin/bash
+        sh -c "umask 002; bash"
+
         # TODO volumes not working
         #--mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
         #--mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc

@@ -10,7 +10,6 @@ RUN apk update \
 	shadow \
 	git \
 	curl \
-	tmux \
 	&& echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 
@@ -28,6 +27,7 @@ FROM build-base AS system-pkgs
 
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	ncurses \
+	tmux \
 	direnv \
 	tree \
 	most \
@@ -42,10 +42,10 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	ripgrep
 
 
-## Rust installation.
-#FROM rust:alpine AS dev-rust
+# Rust installation.
+FROM rust:alpine AS dev-rust
 
-#RUN rustup component add rls rust-analysis rust-src
+RUN rustup component add rls rust-analysis rust-src
 
 
 # Go installation.
@@ -68,7 +68,7 @@ RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm \
 # Home directory builder.
 FROM build-base AS home-builder
 
-RUN apk --no-cache add chezmoi neovim
+RUN apk --no-cache add chezmoi neovim tmux
 
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=node-env /node /node
@@ -130,8 +130,8 @@ RUN addgroup -g ${GID} ${GROUP} \
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=node-env /node /node
-#COPY --from=dev-rust /usr/local/cargo /cargo
-#COPY --from=dev-rust /usr/local/rustup /rustup
+COPY --from=dev-rust /usr/local/cargo /cargo
+COPY --from=dev-rust /usr/local/rustup /rustup
 COPY --from=dev-home --chown=user:user /homedir /homedir
 
 
