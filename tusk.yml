@@ -19,7 +19,7 @@ tasks:
         --build-arg USER=user
         --build-arg GROUP=user
         -t mgnsk/dev-env:latest
-        ./image
+        -f ./image/Dockerfile
 
   bash:
     usage: Run bash shell as a non-root user.
@@ -40,7 +40,7 @@ tasks:
     - command: chmod g+s ./code
     # Give the container GID 3000 write permissions.
     # Assuming /etc/subgid is set up to map host GID 100000 to container GID 0.
-    # Sudo is needed for files created by the container.
+    # Sudo is needed to set the ACL for files owned by the container.
     - command: sudo setfacl -Rm g:103000:rwX ./code
     #- command: >
         #./create_volumes.sh
@@ -56,7 +56,7 @@ tasks:
         --cap-drop=ALL
         --runtime crun
         --memory 2g
-        --userns=auto:uidmapping=${uid}:3000:4000
+        --userns=auto:size=4000
         --mount type=bind,source="$(pwd)/code",target=/code
         --hostname dev-env
         -it
