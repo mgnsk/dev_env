@@ -19,7 +19,7 @@ tasks:
         --build-arg USER=user
         --build-arg GROUP=user
         -t mgnsk/dev-env:latest
-        -f ./image/Dockerfile
+        ./image
 
   bash:
     usage: Run bash shell as a non-root user.
