@@ -40,8 +40,7 @@ tasks:
     - command: chmod g+s ./code
     # Give the container GID 3000 write permissions.
     # Assuming /etc/subgid is set up to map host GID 100000 to container GID 0.
-    # Sudo is needed to set the ACL for files owned by the container.
-    - command: sudo setfacl -Rm g:103000:rwX ./code
+    - command: setfacl -Rdm g:103000:rwX ./code
     #- command: >
         #./create_volumes.sh
         #dev-env_ssh-key
