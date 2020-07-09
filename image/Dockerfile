@@ -136,7 +136,7 @@ COPY --from=dev-home --chown=user:user /homedir /homedir
 
 VOLUME /code
 
-WORKDIR /homedir
+WORKDIR /code
 
 ENV	RUSTUP_HOME=/rustup \
 	CARGO_HOME=/cargo \
