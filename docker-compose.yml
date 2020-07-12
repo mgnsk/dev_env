@@ -18,10 +18,3 @@ services:
     - "./scripts:/scripts"
     entrypoint: /scripts/entrypoint.sh
     hostname: dev-env
-
-volumes:
-  ssh-key:
-  direnv-data:
-  coc-data:
-  nvim-data:
-  tmux-resurrect:
