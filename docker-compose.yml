@@ -1,0 +1,27 @@
+version: '3'
+services:
+  dev-env:
+    image: mgnsk/dev-env:latest
+    build:
+      context: ./image
+      args:
+      - UID=3000
+      - GID=3000
+      - USER=user
+      - GROUP=user
+    cap_drop:
+    - ALL
+    privileged: true
+    mem_limit: 2g
+    volumes:
+    - "./code:/code"
+    - "./scripts:/scripts"
+    entrypoint: /scripts/entrypoint.sh
+    hostname: dev-env
+
+volumes:
+  ssh-key:
+  direnv-data:
+  coc-data:
+  nvim-data:
+  tmux-resurrect:

@@ -6,5 +6,5 @@ before_install:
 before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
 script:
-- "./.direnv/bin/tusk build --cmd docker"
-- "./.direnv/bin/tusk push"
+- "./.direnv/bin/tusk ci-build"
+- "./.direnv/bin/tusk ci-push"
