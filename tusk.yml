@@ -1,7 +1,3 @@
-options:
-  dot_commit:
-    default: f4a98aa9a4e799ab6ff613bf556dcf20e24bda58
-
 tasks:
   build:
     options:
@@ -13,7 +9,6 @@ tasks:
         build
         --pull
         --squash
-        --build-arg dot_commit=${dot_commit}
         --build-arg UID=3000
         --build-arg GID=3000
         --build-arg USER=user
@@ -44,9 +39,9 @@ tasks:
     - command: podman unshare setfacl -Rm g:3001:rwX ./code
     # Set default permissions for new files.
     - command: podman unshare setfacl -Rdm g:3001:rwX ./code
-    #- command: >
-        #./create_volumes.sh
-        #dev-env_ssh-key
+    - command: >
+        ./create_volumes.sh
+        dev-env_ssh-key
         #dev-env_coc-data
         #dev-env_nvim-data
         #dev-env_direnv-allow-cache
@@ -59,16 +54,16 @@ tasks:
         --runtime crun
         --memory 2g
         --userns=auto:size=4000
-        --mount type=bind,source="$(pwd)/code",target=/code
+        --privileged
+        --mount type=bind,source="$PWD/code",target=/code
         --hostname dev-env
         -it
         mgnsk/dev-env
         sh -c "umask 002; bash"
 
-        # TODO volumes not working
-        #--mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
         #--mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
         #--mount type=volume,source=dev-env_nvim-data,target=/homedir/.local/share/nvim
+        #--mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
         #--mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
         #--mount type=volume,source=dev-env_tmux-resurrect,target=/homedir/.tmux/resurrect
   clean:

@@ -6,11 +6,9 @@ RUN apk update \
 	build-base \
 	coreutils \
 	bash \
-	sudo \
 	shadow \
 	git \
-	curl \
-	&& echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+	curl
 
 
 # earlyoom installation.
@@ -33,7 +31,6 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	most \
 	openssh-client \
 	chezmoi \
-	vim \
 	neovim \
 	luajit \
 	perl \
@@ -65,49 +62,6 @@ RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm \
 	&& ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
 
 
-# Home directory builder.
-FROM build-base AS home-builder
-
-RUN apk --no-cache add chezmoi neovim tmux
-
-COPY --from=dev-go /usr/local/go /usr/local/go
-COPY --from=node-env /node /node
-
-ENV GOPATH=/homedir/go \
-	PATH=$GOPATH/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:$PATH
-
-RUN adduser \
-	--disabled-password \
-	--gecos "" \
-	--home /homedir \
-	--ingroup wheel \
-	builder
-
-USER builder
-
-
-# User dotfiles and plugins.
-FROM home-builder AS dev-home
-
-ARG dot_commit
-
-RUN chezmoi init https://github.com/mgnsk/dotfiles.git \
-	&& cd /homedir/.local/share/chezmoi \
-	&& git checkout --quiet ${dot_commit} \
-	&& chezmoi apply \
-	&& cd /homedir \
-	&& bash setup.sh \
-	&& sudo rm -rf \
-	/homedir/go/pkg \
-	/homedir/.local/share/nvim \
-	&& mkdir -p \
-	/homedir/.config/coc \
-	/homedir/.local/share/nvim \
-	/homedir/.local/share/direnv \
-	/homedir/.cache \
-	&& chmod -R g+rwXs /homedir
-
-
 # Development image.
 FROM system-pkgs AS dev-env
 
@@ -124,25 +78,21 @@ RUN addgroup -g ${GID} ${GROUP} \
 	--home /homedir \
 	--ingroup ${GROUP} \
 	--uid ${UID} \
-	${USER} \
-	&& addgroup ${USER} wheel
+	${USER}
 
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
-COPY --from=node-env /node /node
-COPY --from=dev-rust /usr/local/cargo /cargo
-COPY --from=dev-rust /usr/local/rustup /rustup
-COPY --from=dev-home --chown=user:user /homedir /homedir
-
-VOLUME /code
-
-WORKDIR /code
-
-ENV	RUSTUP_HOME=/rustup \
-	CARGO_HOME=/cargo \
-	GOPATH=/homedir/go \
-	PATH=$GOPATH/bin:/cargo/bin:/usr/local/go/bin:/node/bin:/homedir/.npm-global/bin:/homedir/.vim/plugged/gopher.vim/tools/bin:$PATH
+COPY --from=node-env --chown=user:user /node /homedir/.npm-global
+COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
+COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 
 USER user
+
+RUN chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
+	&& . ~/.bashrc \
+	&& bash ~/setup.sh \
+	&& go clean -modcache
+
+WORKDIR /code
 
 CMD ["earlyoom"]
