@@ -20,6 +20,10 @@ Dependencies:
 
 Build and run:
 
+`$ . .envrc` (or use direnv for automatic env).
+
+`$ ./setup.sh`
+
 `$ tusk build`
 
 `$ tusk bash`
