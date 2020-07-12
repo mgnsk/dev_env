@@ -88,6 +88,8 @@ COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 
 USER user
 
+SHELL ["/bin/bash"]
+
 RUN chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
 	&& . ~/.bashrc \
 	&& bash ~/setup.sh \
