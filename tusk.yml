@@ -56,10 +56,12 @@ tasks:
         --userns=auto:size=4000
         --privileged
         --mount type=bind,source="$PWD/code",target=/code
+        --mount type=bind,source="$PWD/scripts",target=/scripts
+        --entrypoint /scripts/entrypoint.sh
         --hostname dev-env
         -it
         mgnsk/dev-env
-        sh -c "umask 002; bash"
+        /bin/bash
 
         #--mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
         #--mount type=volume,source=dev-env_nvim-data,target=/homedir/.local/share/nvim

@@ -53,15 +53,6 @@ FROM golang:alpine AS dev-go
 FROM node:alpine AS dev-node
 
 
-# Node binaries.
-FROM alpine:edge AS node-env
-
-COPY --from=dev-node /usr/local/bin/node /node/bin/node
-COPY --from=dev-node /usr/local/lib/node_modules /node/lib/node_modules
-RUN ln -s /node/lib/node_modules/npm/bin/npm-cli.js /node/bin/npm \
-	&& ln -s /node/lib/node_modules/npm/bin/npx-cli.js /node/bin/npx
-
-
 # Development image.
 FROM system-pkgs AS dev-env
 
@@ -82,19 +73,19 @@ RUN addgroup -g ${GID} ${GROUP} \
 
 COPY --from=dev-go /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
-COPY --from=node-env --chown=user:user /node /homedir/.npm-global
+COPY --from=dev-node --chown=user:user /usr/local/bin /homedir/.npm-global/bin
+COPY --from=dev-node --chown=user:user /usr/local/lib /homedir/.npm-global/lib
+COPY --from=dev-node /opt /opt
 COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
 COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 
 USER user
 
-SHELL ["/bin/bash"]
+ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.cargo/bin:$PATH \
+	GOPATH=/homedir/go
 
 RUN chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
-	&& . ~/.bashrc \
 	&& bash ~/setup.sh \
 	&& go clean -modcache
 
 WORKDIR /code
-
-CMD ["earlyoom"]
