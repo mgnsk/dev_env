@@ -4,11 +4,7 @@ RUN apk update \
 	&& apk --no-cache upgrade \
 	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	build-base \
-	coreutils \
-	bash \
-	shadow \
-	git \
-	curl
+	git
 
 
 # earlyoom installation.
@@ -24,6 +20,9 @@ RUN mkdir -p /tmp/earlyoom \
 FROM build-base AS system-pkgs
 
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	coreutils \
+	bash \
+	shadow \
 	ncurses \
 	tmux \
 	direnv \
@@ -36,21 +35,14 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	perl \
 	ctags \
 	fzf \
-	ripgrep
+	ripgrep \
+	curl
 
 
 # Rust installation.
 FROM rust:alpine AS dev-rust
 
 RUN rustup component add rls rust-analysis rust-src
-
-
-# Go installation.
-FROM golang:alpine AS dev-go
-
-
-# NodeJS installation.
-FROM node:alpine AS dev-node
 
 
 # Development image.
@@ -71,11 +63,11 @@ RUN addgroup -g ${GID} ${GROUP} \
 	--uid ${UID} \
 	${USER}
 
-COPY --from=dev-go /usr/local/go /usr/local/go
+COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
-COPY --from=dev-node --chown=user:user /usr/local/bin /homedir/.npm-global/bin
-COPY --from=dev-node --chown=user:user /usr/local/lib /homedir/.npm-global/lib
-COPY --from=dev-node /opt /opt
+COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
+COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
+COPY --from=node:alpine /opt /opt
 COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
 COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 
