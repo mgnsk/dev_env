@@ -20,7 +20,6 @@ services:
     - "nvim-data:/homedir/.local/share/nvim"
     - "direnv-data:/homedir/.local/share/direnv"
     - "tmux-resurrect:/homedir/.tmux/resurrect"
-    entrypoint: /scripts/entrypoint.sh
     hostname: dev-env
 
   volumes:

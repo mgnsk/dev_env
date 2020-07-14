@@ -66,6 +66,9 @@ COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bi
 COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
 COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
 COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
+COPY ./entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 USER user
 
@@ -83,3 +86,5 @@ RUN chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
 	/homedir/.tmux/resurrect
 
 WORKDIR /mount
+
+ENTRYPOINT ["/entrypoint.sh"]
