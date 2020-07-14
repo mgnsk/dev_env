@@ -14,7 +14,6 @@ services:
     mem_limit: 2g
     volumes:
     - "./mount:/mount"
-    - "./scripts:/scripts"
     - "ssh-key:/homedir/.ssh"
     - "coc-data:/homedir/.config/coc"
     - "nvim-data:/homedir/.local/share/nvim"
