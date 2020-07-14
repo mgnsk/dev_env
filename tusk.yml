@@ -4,37 +4,30 @@ tasks:
     - command: >
         podman-compose build
 
-  _mkcode:
+  _mkmount:
     options:
       gid:
         default:
           command: id -g
     run:
-    - command: mkdir -p ./code
-    - command: chgrp +${gid} ./code
-    - command: chmod g+s ./code
+    - command: mkdir -p ./mount
+    - command: chgrp +${gid} ./mount
+    - command: chmod g+s ./mount
 
   root:
     usage: Run a root shell.
     run:
-    - task: _mkcode
+    - task: _mkmount
     - command: podman-compose -p dev-env run --rm --user root dev-env /bin/bash
 
   bash:
     usage: Run bash shell as a non-root user.
     run:
-    - task: _mkcode
-    # Give recursive permissions to existing files.
-    - command: podman unshare setfacl -Rm g:3000:rwX ./code
-    # Set default permissions for new files.
-    - command: podman unshare setfacl -Rdm g:3000:rwX ./code
+    - task: _mkmount
+    - command: podman unshare setfacl -Rm g:3000:rwX ./mount
+    - command: podman unshare setfacl -Rdm g:3000:rwx ./mount
     - command: podman-compose -p dev-env run --rm dev-env /bin/bash
 
-        #--mount type=volume,source=dev-env_coc-data,target=/homedir/.config/coc
-        #--mount type=volume,source=dev-env_nvim-data,target=/homedir/.local/share/nvim
-        #--mount type=volume,source=dev-env_ssh-key,target=/homedir/.ssh
-        #--mount type=volume,source=dev-env_direnv-allow-cache,target=/homedir/.local/share/direnv
-        #--mount type=volume,source=dev-env_tmux-resurrect,target=/homedir/.tmux/resurrect
   clean:
     run:
     - command: podman rmi mgnsk/dev-env

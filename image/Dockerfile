@@ -16,8 +16,19 @@ RUN mkdir -p /tmp/earlyoom \
 	&& make
 
 
-# System packages.
-FROM build-base AS system-pkgs
+# Rust installation.
+FROM rust:alpine AS dev-rust
+
+RUN rustup component add rls rust-analysis rust-src
+
+
+# Development image.
+FROM build-base AS dev-env
+
+ARG UID
+ARG GID
+ARG USER
+ARG GROUP
 
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	coreutils \
@@ -37,21 +48,6 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	fzf \
 	ripgrep \
 	curl
-
-
-# Rust installation.
-FROM rust:alpine AS dev-rust
-
-RUN rustup component add rls rust-analysis rust-src
-
-
-# Development image.
-FROM system-pkgs AS dev-env
-
-ARG UID
-ARG GID
-ARG USER
-ARG GROUP
 
 RUN addgroup -g ${GID} ${GROUP} \
 	&& groupmod -g ${GID} ${GROUP} \
@@ -78,6 +74,12 @@ ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.ca
 
 RUN chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
 	&& bash ~/setup.sh \
-	&& go clean -modcache
+	&& go clean -modcache \
+	&& mkdir -p \
+	/homedir/.ssh \
+	/homedir/.config/coc \
+	/homedir/.local/share/nvim \
+	/homedir/.local/share/direnv \
+	/homedir/.tmux/resurrect
 
-WORKDIR /code
+WORKDIR /mount

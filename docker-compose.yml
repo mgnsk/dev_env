@@ -1,4 +1,4 @@
-version: '3'
+version: '2.4'
 services:
   dev-env:
     image: mgnsk/dev-env:latest
@@ -13,7 +13,19 @@ services:
     - ALL
     mem_limit: 2g
     volumes:
-    - "./code:/code"
+    - "./mount:/mount"
     - "./scripts:/scripts"
+    - "ssh-key:/homedir/.ssh"
+    - "coc-data:/homedir/.config/coc"
+    - "nvim-data:/homedir/.local/share/nvim"
+    - "direnv-data:/homedir/.local/share/direnv"
+    - "tmux-resurrect:/homedir/.tmux/resurrect"
     entrypoint: /scripts/entrypoint.sh
     hostname: dev-env
+
+  volumes:
+    ssh-key:
+    coc-data:
+    nvim-data:
+    direnv-data:
+    tmux-resurrect:
