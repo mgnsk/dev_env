@@ -1,8 +1,7 @@
 tasks:
   build:
     run:
-    - command: >
-        podman-compose build
+    - command: podman-compose build
 
   root:
     usage: Run a root shell.
