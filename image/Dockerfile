@@ -59,11 +59,11 @@ RUN addgroup -g ${GID} ${GROUP} \
 	--uid ${UID} \
 	${USER}
 
-COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
+COPY --from=golang:alpine /usr/local/go /usr/local/go
+COPY --from=node:alpine /opt /opt
 COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
 COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
-COPY --from=node:alpine /opt /opt
 COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
 COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 
