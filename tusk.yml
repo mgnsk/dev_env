@@ -4,7 +4,14 @@ tasks:
     - command: >
         podman-compose build
 
-  _mkmount:
+  root:
+    usage: Run a root shell.
+    run:
+    - command: mkdir -p ./mount
+    - command: podman-compose -p dev-env run --rm --user root dev-env /bin/bash
+
+  bash:
+    usage: Run bash shell as a non-root user.
     options:
       gid:
         default:
@@ -13,17 +20,6 @@ tasks:
     - command: mkdir -p ./mount
     - command: chgrp +${gid} ./mount
     - command: chmod g+s ./mount
-
-  root:
-    usage: Run a root shell.
-    run:
-    - task: _mkmount
-    - command: podman-compose -p dev-env run --rm --user root dev-env /bin/bash
-
-  bash:
-    usage: Run bash shell as a non-root user.
-    run:
-    - task: _mkmount
     - command: podman unshare setfacl -Rm g:3000:rwX ./mount
     - command: podman unshare setfacl -Rdm g:3000:rwx ./mount
     - command: podman-compose -p dev-env run --rm dev-env /bin/bash
