@@ -36,8 +36,6 @@ tasks:
         --pull
         --build-arg UID=${build_uid}
         --build-arg GID=${build_gid}
-        --build-arg USER=${build_user}
-        --build-arg GROUP=${build_group}
         -t mgnsk/dev-env:latest
         ./image
 
