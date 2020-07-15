@@ -57,7 +57,9 @@ RUN addgroup -g ${GID} ${GROUP} \
 	--home /homedir \
 	--ingroup ${GROUP} \
 	--uid ${UID} \
-	${USER}
+	${USER} \
+	&& rm -rf /root \
+	&& ln -s /homedir /root
 
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=golang:alpine /usr/local/go /usr/local/go
