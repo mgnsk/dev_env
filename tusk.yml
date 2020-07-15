@@ -3,10 +3,6 @@ options:
     default: 3000
   build_gid:
     default: 3000
-  build_user:
-    default: user
-  build_group:
-    default: user
 
 tasks:
   build:

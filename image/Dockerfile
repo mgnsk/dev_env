@@ -27,8 +27,6 @@ FROM build-base AS dev-env
 
 ARG UID
 ARG GID
-ARG USER
-ARG GROUP
 
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	coreutils \
@@ -50,35 +48,30 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	ripgrep \
 	curl
 
-RUN addgroup -g ${GID} ${GROUP} \
-	&& groupmod -g ${GID} ${GROUP} \
+RUN addgroup -g ${GID} user \
+	&& groupmod -g ${GID} user \
 	&& adduser \
 	--disabled-password \
 	--gecos "" \
 	--home /homedir \
-	--ingroup ${GROUP} \
+	--ingroup user \
 	--uid ${UID} \
-	${USER} \
+	user \
 	&& rm -rf /root \
 	&& ln -s /homedir /root
 
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=node:alpine /opt /opt
-COPY --from=node:alpine /usr/local/bin /homedir/.npm-global/bin
-COPY --from=node:alpine /usr/local/lib /homedir/.npm-global/lib
-COPY --from=dev-rust /usr/local/cargo /homedir/.cargo
-COPY --from=dev-rust /usr/local/rustup /homedir/.rustup
+COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
+COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
+COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
+COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 COPY ./entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh \
-	# Docker doesn't support COPY --chown=${UID}:${GID}.
-	&& chown -R user:user \
-	/homedir/.npm-global \
-	/homedir/.cargo \
-	/homedir/.rustup
+RUN chmod +x /entrypoint.sh
 
-USER ${USER}
+USER user
 
 ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.cargo/bin:$PATH \
 	GOPATH=/homedir/go
