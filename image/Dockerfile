@@ -44,6 +44,7 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	neovim \
 	luajit \
 	perl \
+	clang-dev \
 	ctags \
 	fzf \
 	ripgrep \
