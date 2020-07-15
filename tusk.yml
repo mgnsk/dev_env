@@ -28,7 +28,6 @@ tasks:
         docker
         build
         --pull
-        --squash
         --build-arg UID=3000
         --build-arg GID=3000
         --build-arg USER=user
