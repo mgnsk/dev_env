@@ -4,7 +4,7 @@ language: minimal
 addons:
   snaps:
   - name: podman
-    confinement: strict
+    confinement: devmode
     channel: edge
 before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
