@@ -65,10 +65,10 @@ RUN addgroup -g ${GID} ${GROUP} \
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=node:alpine /opt /opt
-COPY --from=node:alpine --chown=${USER}:${GROUP} /usr/local/bin /homedir/.npm-global/bin
-COPY --from=node:alpine --chown=${USER}:${GROUP} /usr/local/lib /homedir/.npm-global/lib
-COPY --from=dev-rust --chown=${USER}:${GROUP} /usr/local/cargo /homedir/.cargo
-COPY --from=dev-rust --chown=${USER}:${GROUP} /usr/local/rustup /homedir/.rustup
+COPY --from=node:alpine --chown=${UID}:${GID} /usr/local/bin /homedir/.npm-global/bin
+COPY --from=node:alpine --chown=${UID}:${GID} /usr/local/lib /homedir/.npm-global/lib
+COPY --from=dev-rust --chown=${UID}:${GID} /usr/local/cargo /homedir/.cargo
+COPY --from=dev-rust --chown=${UID}:${GID} /usr/local/rustup /homedir/.rustup
 COPY ./entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
