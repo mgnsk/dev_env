@@ -1,3 +1,13 @@
+options:
+  build_uid:
+    default: 3000
+  build_gid:
+    default: 3000
+  build_user:
+    default: user
+  build_group:
+    default: user
+
 tasks:
   build:
     run:
@@ -14,8 +24,8 @@ tasks:
     run:
     - command: mkdir -p ./mount
     - command: chmod g+s ./mount
-    - command: podman unshare setfacl -Rm g:3000:rwX ./mount
-    - command: podman unshare setfacl -Rdm g:3000:rwx ./mount
+    - command: podman unshare setfacl -Rm g:${build_gid}:rwX ./mount
+    - command: podman unshare setfacl -Rdm g:${build_gid}:rwx ./mount
     - command: podman-compose -p dev-env run --rm dev-env /bin/bash
 
   clean:
@@ -28,10 +38,10 @@ tasks:
         docker
         build
         --pull
-        --build-arg UID=3000
-        --build-arg GID=3000
-        --build-arg USER=user
-        --build-arg GROUP=user
+        --build-arg UID=${build_uid}
+        --build-arg GID=${build_gid}
+        --build-arg USER=${build_user}
+        --build-arg GROUP=${build_group}
         -t mgnsk/dev-env:latest
         ./image
 
