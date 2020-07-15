@@ -35,7 +35,7 @@ tasks:
   ci-build:
     run:
     - command: >
-        podman
+        /snap/bin/podman
         build
         --pull
         --build-arg UID=${build_uid}

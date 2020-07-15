@@ -10,5 +10,5 @@ before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
 
 script:
-  - "PATH=/snap/bin:$PATH ./.direnv/bin/tusk ci-build"
+- "./.direnv/bin/tusk ci-build"
 - "./.direnv/bin/tusk ci-push"
