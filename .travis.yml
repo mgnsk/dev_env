@@ -8,6 +8,7 @@ addons:
 
 before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
+- source ~/.profile
 
 script:
 - "./.direnv/bin/tusk ci-build"
