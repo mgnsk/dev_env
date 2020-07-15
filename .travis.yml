@@ -1,20 +1,14 @@
 language: minimal
-#services:
-#- docker
+
 addons:
   snaps:
   - name: podman
     confinement: devmode
     channel: edge
-  apt:
-    update: true
-    packages:
-      - python3-pip
 
 before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
-- pip3 install podman-compose
 
 script:
-- "./.direnv/bin/tusk build"
+- "./.direnv/bin/tusk ci-build"
 - "./.direnv/bin/tusk ci-push"

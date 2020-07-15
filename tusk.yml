@@ -35,7 +35,7 @@ tasks:
   ci-build:
     run:
     - command: >
-        docker
+        podman
         build
         --pull
         --build-arg UID=${build_uid}
@@ -48,5 +48,5 @@ tasks:
   ci-push:
     run:
       command: |
-        echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
-        docker push mgnsk/dev-env:latest
+        echo "$DOCKER_TOKEN" | podman login -u mgnsk --password-stdin
+        podman push mgnsk/dev-env:latest
