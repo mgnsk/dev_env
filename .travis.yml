@@ -1,8 +1,13 @@
 language: minimal
-services:
-- docker
+#services:
+#- docker
 before_script:
 - curl -sL https://git.io/tusk | bash -s -- -b .direnv/bin latest
+- . /etc/os-release
+- echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+- curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
+- apt-get update -qq
+- apt-get -qq -y install podman
 script:
-- "./.direnv/bin/tusk ci-build"
+- "./.direnv/bin/tusk build"
 - "./.direnv/bin/tusk ci-push"
