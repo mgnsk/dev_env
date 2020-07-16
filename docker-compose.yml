@@ -14,16 +14,20 @@ services:
     mem_limit: 2g
     volumes:
       - "./mount:/mount"
-      - "cache:/homedir/.cache"
       - "ssh-key:/homedir/.ssh"
+      - "cache:/homedir/.cache"
       - "nvim-data:/homedir/.local/share/nvim"
+      - "coc-clangd-data:/homedir/.config/coc/extensions/coc-clangd-data"
+      - "coc-phpls-data:/homedir/.config/coc/extensions/coc-phpls-data"
       - "direnv-data:/homedir/.local/share/direnv"
       - "tmux-resurrect:/homedir/.tmux/resurrect"
     hostname: dev-env
 
   volumes:
-    cache:
     ssh-key:
+    cache:
     nvim-data:
+    coc-clangd-data:
+    coc-phpls-data:
     direnv-data:
     tmux-resurrect:

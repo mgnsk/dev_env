@@ -100,9 +100,11 @@ RUN chezmoi init ${dot_url} \
 	&& bash ~/setup.sh \
 	&& rm -rf ~/.cache \
 	&& mkdir -p \
-	~/.cache \
 	~/.ssh \
+	~/.cache \
 	~/.local/share/nvim \
+	~/.config/coc/extensions/coc-clangd-data \
+	~/.config/coc/extensions/coc-phpls-data \
 	~/.local/share/direnv \
 	~/.tmux/resurrect
 

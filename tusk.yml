@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 025a7713f90fb35d9a5af04f0a6314685aecb0e5
+    default: e5e57995bfbdd28e8b961f01477bab226aa1ad2f
 
 tasks:
   build:
@@ -22,7 +22,7 @@ tasks:
     usage: Run a root shell.
     run:
       - command: mkdir -p ./mount
-      - command: podman-compose -p dev-env run --rm --user root dev-env /bin/bash
+      - command: podman-compose -p dev-env run --rm --service-ports --user root dev-env /bin/bash
 
   bash:
     usage: Run bash shell as a non-root user.
@@ -31,7 +31,7 @@ tasks:
       - command: chmod g+s ./mount
       - command: podman unshare setfacl -Rm g:${gid}:rwX ./mount
       - command: podman unshare setfacl -Rdm g:${gid}:rwx ./mount
-      - command: podman-compose -p dev-env run --rm dev-env /bin/bash
+      - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   clean:
     run:
