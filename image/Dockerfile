@@ -4,6 +4,8 @@ RUN apk update \
 	&& apk --no-cache upgrade \
 	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	build-base \
+	coreutils \
+	shadow \
 	git
 
 
@@ -25,26 +27,6 @@ RUN rustup component add rls rust-analysis rust-src
 # Development image.
 FROM build-base AS dev-env
 
-RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
-	coreutils \
-	bash \
-	shadow \
-	ncurses \
-	tmux \
-	direnv \
-	tree \
-	most \
-	openssh-client \
-	chezmoi \
-	neovim \
-	luajit \
-	perl \
-	clang-dev \
-	ctags \
-	fzf \
-	ripgrep \
-	curl
-
 ARG uid
 ARG gid
 
@@ -61,7 +43,6 @@ RUN addgroup -g ${gid} user \
 	&& ln -s /homedir /root
 
 COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
-COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=node:alpine /opt /opt
 COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
 COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
@@ -69,7 +50,40 @@ COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
 COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
 COPY ./entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh \
+	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	bash \
+	ncurses \
+	tmux \
+	direnv \
+	tree \
+	most \
+	openssh-client \
+	chezmoi \
+	neovim \
+	luajit \
+	go \
+	perl \
+	php7 \
+	php7-iconv \
+	php7-json \
+	php7-mbstring \
+	php7-openssl \
+	php7-phar \
+	php7-simplexml \
+	php7-curl \
+	php7-tokenizer \
+	php7-dom \
+	php7-ctype \
+	php7-xml \
+	php7-xmlwriter \
+	php7-pcntl \
+	composer \
+	clang-dev \
+	ctags \
+	fzf \
+	ripgrep \
+	curl
 
 USER user
 
@@ -84,13 +98,13 @@ RUN chezmoi init ${dot_url} \
 	&& git checkout --quiet ${dot_commit} \
 	&& chezmoi apply \
 	&& bash ~/setup.sh \
-	&& go clean -modcache \
+	&& rm -rf ~/.cache \
 	&& mkdir -p \
-	/homedir/.ssh \
-	/homedir/.config/coc \
-	/homedir/.local/share/nvim \
-	/homedir/.local/share/direnv \
-	/homedir/.tmux/resurrect
+	~/.cache \
+	~/.ssh \
+	~/.local/share/nvim \
+	~/.local/share/direnv \
+	~/.tmux/resurrect
 
 WORKDIR /mount
 
