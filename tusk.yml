@@ -1,43 +1,54 @@
 options:
-  build_uid:
+  uid:
     default: 3000
-  build_gid:
+  gid:
     default: 3000
+  dot_url:
+    default: https://github.com/mgnsk/dotfiles.git
+  dot_commit:
+    default: a01111112e1ee0147faa9778fb0d0e8291336ad4
 
 tasks:
   build:
     run:
-    - command: podman-compose build
+      - set-environment:
+          UID: ${uid}
+          GID: ${gid}
+          DOT_URL: ${dot_url}
+          DOT_COMMIT: ${dot_commit}
+      - command: podman-compose build
 
   root:
     usage: Run a root shell.
     run:
-    - command: mkdir -p ./mount
-    - command: podman-compose -p dev-env run --rm --user root dev-env /bin/bash
+      - command: mkdir -p ./mount
+      - command: podman-compose -p dev-env run --rm --user root dev-env /bin/bash
 
   bash:
     usage: Run bash shell as a non-root user.
     run:
-    - command: mkdir -p ./mount
-    - command: chmod g+s ./mount
-    - command: podman unshare setfacl -Rm g:${build_gid}:rwX ./mount
-    - command: podman unshare setfacl -Rdm g:${build_gid}:rwx ./mount
-    - command: podman-compose -p dev-env run --rm dev-env /bin/bash
+      - command: mkdir -p ./mount
+      - command: chmod g+s ./mount
+      - command: podman unshare setfacl -Rm g:${gid}:rwX ./mount
+      - command: podman unshare setfacl -Rdm g:${gid}:rwx ./mount
+      - command: podman-compose -p dev-env run --rm dev-env /bin/bash
 
   clean:
     run:
-    - command: podman rmi mgnsk/dev-env
+      - command: podman rmi mgnsk/dev-env
 
   ci-build:
     run:
-    - command: >
-        docker
-        build
-        --pull
-        --build-arg UID=${build_uid}
-        --build-arg GID=${build_gid}
-        -t mgnsk/dev-env:latest
-        ./image
+      - command: >
+          docker
+          build
+          --pull
+          --build-arg uid=${uid}
+          --build-arg gid=${gid}
+          --build-arg dot_url=${dot_url}
+          --build-arg dot_commit=${dot_commit}
+          -t mgnsk/dev-env:latest
+          ./image
 
   ci-push:
     run:

@@ -25,9 +25,6 @@ RUN rustup component add rls rust-analysis rust-src
 # Development image.
 FROM build-base AS dev-env
 
-ARG UID
-ARG GID
-
 RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	coreutils \
 	bash \
@@ -48,14 +45,17 @@ RUN apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	ripgrep \
 	curl
 
-RUN addgroup -g ${GID} user \
-	&& groupmod -g ${GID} user \
+ARG uid
+ARG gid
+
+RUN addgroup -g ${gid} user \
+	&& groupmod -g ${gid} user \
 	&& adduser \
 	--disabled-password \
 	--gecos "" \
 	--home /homedir \
 	--ingroup user \
-	--uid ${UID} \
+	--uid ${uid} \
 	user \
 	&& rm -rf /root \
 	&& ln -s /homedir /root
@@ -76,7 +76,13 @@ USER user
 ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.cargo/bin:$PATH \
 	GOPATH=/homedir/go
 
-RUN chezmoi init --apply https://github.com/mgnsk/dotfiles.git \
+ARG dot_url
+ARG dot_commit
+
+RUN chezmoi init ${dot_url} \
+	&& cd ~/.local/share/chezmoi \
+	&& git checkout --quiet ${dot_commit} \
+	&& chezmoi apply \
 	&& bash ~/setup.sh \
 	&& go clean -modcache \
 	&& mkdir -p \

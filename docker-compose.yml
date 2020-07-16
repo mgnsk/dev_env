@@ -1,22 +1,24 @@
-version: '2.4'
+version: "2.4"
 services:
   dev-env:
     image: mgnsk/dev-env:latest
     build:
       context: ./image
       args:
-      - UID=3000
-      - GID=3000
+        - uid=${UID}
+        - gid=${GID}
+        - dot_url=${DOT_URL}
+        - dot_commit=${DOT_COMMIT}
     cap_drop:
-    - ALL
+      - ALL
     mem_limit: 2g
     volumes:
-    - "./mount:/mount"
-    - "ssh-key:/homedir/.ssh"
-    - "coc-data:/homedir/.config/coc"
-    - "nvim-data:/homedir/.local/share/nvim"
-    - "direnv-data:/homedir/.local/share/direnv"
-    - "tmux-resurrect:/homedir/.tmux/resurrect"
+      - "./mount:/mount"
+      - "ssh-key:/homedir/.ssh"
+      - "coc-data:/homedir/.config/coc"
+      - "nvim-data:/homedir/.local/share/nvim"
+      - "direnv-data:/homedir/.local/share/direnv"
+      - "tmux-resurrect:/homedir/.tmux/resurrect"
     hostname: dev-env
 
   volumes:
