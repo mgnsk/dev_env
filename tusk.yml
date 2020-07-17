@@ -28,8 +28,11 @@ tasks:
     usage: Run bash shell as a non-root user.
     run:
       - command: mkdir -p ./mount
+      # Files created by the container will be writable by the host.
       - command: chmod g+s ./mount
+      # Existing host files are writable by the container.
       - command: podman unshare setfacl -Rm g:${gid}:rwX ./mount
+      # Files created by the host will be writable by the container.
       - command: podman unshare setfacl -Rdm g:${gid}:rwx ./mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 

@@ -24,6 +24,8 @@ services:
       - "composer-global:/homedir/.composer"
       - "npm-global:/homedir/.npm-global"
       - "go-global:/homedir/go"
+      - "python-global:/homedir/.local/lib/python3.8"
+      - "local-bin:/homedir/.local/bin"
     hostname: dev-env
 
   volumes:
@@ -37,3 +39,5 @@ services:
     composer-global:
     npm-global:
     go-global:
+    python-global:
+    local-bin:
