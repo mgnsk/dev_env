@@ -29,7 +29,7 @@ tasks:
     run:
       - command: mkdir -p ./mount
       # Files created by the container will be writable by the host.
-      - command: chmod -R g+rwXs ./mount
+      - command: chmod g+rwXs ./mount
       # Existing host files are writable by the container.
       - command: podman unshare setfacl -Rm g:${gid}:rwX ./mount
       # Files created by the host will be writable by the container.
