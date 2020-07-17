@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: e5e57995bfbdd28e8b961f01477bab226aa1ad2f
+    default: 3826e3c0f6027bfc3384c5318aefd9cfb4205d7a
 
 tasks:
   build:
@@ -35,7 +35,8 @@ tasks:
 
   clean:
     run:
-      - command: podman rmi mgnsk/dev-env
+      - command: podman pod rm dev-env || true
+      - command: podman rmi mgnsk/dev-env || true
 
   ci-build:
     run:
