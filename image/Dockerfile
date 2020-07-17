@@ -64,21 +64,8 @@ RUN chmod +x /entrypoint.sh \
 	luajit \
 	go \
 	perl \
-	php7 \
-	php7-iconv \
-	php7-json \
-	php7-mbstring \
-	php7-openssl \
-	php7-phar \
-	php7-simplexml \
-	php7-curl \
-	php7-tokenizer \
-	php7-dom \
-	php7-ctype \
-	php7-xml \
-	php7-xmlwriter \
-	php7-pcntl \
 	composer \
+	php7-curl \
 	clang-dev \
 	ctags \
 	fzf \
