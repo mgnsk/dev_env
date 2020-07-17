@@ -59,11 +59,13 @@ RUN chmod +x /entrypoint.sh \
 	tree \
 	most \
 	openssh-client \
-	chezmoi \
 	neovim \
 	luajit \
 	go \
 	perl \
+	py3-pip \
+	python3-dev \
+	linux-headers \
 	composer \
 	php7-curl \
 	clang-dev \
@@ -80,12 +82,12 @@ ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.ca
 ARG dot_url
 ARG dot_commit
 
-RUN chezmoi init ${dot_url} \
-	&& cd ~/.local/share/chezmoi \
-	&& git checkout --quiet ${dot_commit} \
-	&& chezmoi apply \
+RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
+    && rm -r ~/dotfiles-tmp/ \
+	&& /usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME reset --hard ${dot_commit} \
 	&& bash ~/setup.sh \
 	&& rm -rf ~/.cache \
+	# Set up volumes.
 	&& mkdir -p \
 	~/.ssh \
 	~/.cache \
@@ -93,7 +95,10 @@ RUN chezmoi init ${dot_url} \
 	~/.config/coc/extensions/coc-clangd-data \
 	~/.config/coc/extensions/coc-phpls-data \
 	~/.local/share/direnv \
-	~/.tmux/resurrect
+	~/.tmux/resurrect \
+	~/.composer \
+	~/.npm-global \
+	~/go
 
 WORKDIR /mount
 

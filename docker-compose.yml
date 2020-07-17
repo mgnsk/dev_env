@@ -21,6 +21,9 @@ services:
       - "coc-phpls-data:/homedir/.config/coc/extensions/coc-phpls-data"
       - "direnv-data:/homedir/.local/share/direnv"
       - "tmux-resurrect:/homedir/.tmux/resurrect"
+      - "composer-global:/homedir/.composer"
+      - "npm-global:/homedir/.npm-global"
+      - "go-global:/homedir/go"
     hostname: dev-env
 
   volumes:
@@ -31,3 +34,6 @@ services:
     coc-phpls-data:
     direnv-data:
     tmux-resurrect:
+    composer-global:
+    npm-global:
+    go-global:
