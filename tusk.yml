@@ -1,7 +1,4 @@
 options:
-  host_uid:
-    default:
-      command: id -u
   container_uid:
     default: 3000
   container_gid:
@@ -32,7 +29,7 @@ tasks:
     run:
       - command: mkdir -p ./mount
       # Files created by the container will be writable by the host.
-      - command: setfacl -Rdm u:${host_uid}:rwX ./mount
+      - command: podman unshare setfacl -Rdm u:0:rwX ./mount
       # Existing host files are writable by the container.
       - command: podman unshare setfacl -Rm g:${container_gid}:rwX ./mount
       # Files created by the host will be writable by the container.
