@@ -1,7 +1,10 @@
 options:
-  uid:
+  host_uid:
+    default:
+      command: id -u
+  container_uid:
     default: 3000
-  gid:
+  container_gid:
     default: 3000
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
@@ -12,8 +15,8 @@ tasks:
   build:
     run:
       - set-environment:
-          UID: ${uid}
-          GID: ${gid}
+          UID: ${container_uid}
+          GID: ${container_gid}
           DOT_URL: ${dot_url}
           DOT_COMMIT: ${dot_commit}
       - command: podman-compose build
@@ -29,11 +32,11 @@ tasks:
     run:
       - command: mkdir -p ./mount
       # Files created by the container will be writable by the host.
-      - command: chmod g+rwXs ./mount
+      - command: setfacl -Rdm u:${host_uid}:rwX ./mount
       # Existing host files are writable by the container.
-      - command: podman unshare setfacl -Rm g:${gid}:rwX ./mount
+      - command: podman unshare setfacl -Rm g:${container_gid}:rwX ./mount
       # Files created by the host will be writable by the container.
-      - command: podman unshare setfacl -Rdm g:${gid}:rwx ./mount
+      - command: podman unshare setfacl -Rdm g:${container_gid}:rwx ./mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   clean:
@@ -47,8 +50,8 @@ tasks:
           docker
           build
           --pull
-          --build-arg uid=${uid}
-          --build-arg gid=${gid}
+          --build-arg uid=${container_uid}
+          --build-arg gid=${container_gid}
           --build-arg dot_url=${dot_url}
           --build-arg dot_commit=${dot_commit}
           -t mgnsk/dev-env:latest
