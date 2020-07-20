@@ -5,10 +5,10 @@ services:
     build:
       context: ./image
       args:
-        - uid=${UID}
-        - gid=${GID}
-        - dot_url=${DOT_URL}
-        - dot_commit=${DOT_COMMIT}
+        - uid
+        - gid
+        - dot_url
+        - dot_commit
     cap_drop:
       - ALL
     mem_limit: 2g

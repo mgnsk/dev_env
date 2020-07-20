@@ -6,17 +6,18 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 23e52604af6acca2cea3d93f1b5be2003636d60d
+    default: 739a71ca7503de46594bd41423aa562702ec19d6
 
 tasks:
   build:
     run:
-      - set-environment:
-          UID: ${container_uid}
-          GID: ${container_gid}
-          DOT_URL: ${dot_url}
-          DOT_COMMIT: ${dot_commit}
-      - command: podman-compose build
+      - command: >
+          podman-compose
+          build
+          --build-arg uid=${container_uid}
+          --build-arg gid=${container_gid}
+          --build-arg dot_url=${dot_url}
+          --build-arg dot_commit=${dot_commit}
 
   root:
     usage: Run a root shell.
