@@ -14,6 +14,7 @@ services:
     mem_limit: 2g
     volumes:
       - "./mount:/mount"
+      - "tmp:/tmp"
       - "ssh-key:/homedir/.ssh"
       - "cache:/homedir/.cache"
       - "nvim-data:/homedir/.local/share/nvim"
@@ -29,6 +30,7 @@ services:
     hostname: dev-env
 
   volumes:
+    tmp:
     ssh-key:
     cache:
     nvim-data:

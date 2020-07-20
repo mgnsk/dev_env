@@ -87,6 +87,7 @@ RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
 	&& /usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME reset --hard ${dot_commit} \
 	&& bash ~/setup.sh \
 	&& rm -rf ~/.cache \
+	&& rm -r /tmp/* \
 	# Set up volumes.
 	&& mkdir -p \
 	~/.ssh \
