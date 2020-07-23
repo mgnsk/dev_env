@@ -31,9 +31,9 @@ tasks:
       - command: mkdir -p ./mount
       # Files created by container users will be writable by the host.
       # Files created by the host will be writable by container users.
-      - command: podman unshare setfacl -Rdm u:0:rwX,g:${container_gid}:rwX ./mount
+      - command: podman unshare setfacl -Rndm u:0:rwX,g:${container_gid}:rwX ./mount
       # Existing host files are writable by container users.
-      - command: podman unshare setfacl -Rm u:0:rwX,g:${container_gid}:rwX ./mount
+      - command: podman unshare setfacl -Rnm u:0:rwX,g:${container_gid}:rwX ./mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   clean:
