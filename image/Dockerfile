@@ -58,7 +58,6 @@ RUN chmod +x /entrypoint.sh \
 	direnv \
 	tree \
 	most \
-	openssh-client \
 	neovim \
 	luajit \
 	go \
@@ -66,8 +65,6 @@ RUN chmod +x /entrypoint.sh \
 	py3-pip \
 	python3-dev \
 	linux-headers \
-	composer \
-	php7-curl \
 	clang-dev \
 	ctags \
 	fzf \
@@ -90,7 +87,6 @@ RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
 	&& rm -r /tmp/* \
 	# Set up volumes.
 	&& mkdir -p \
-	~/.ssh \
 	~/.cache \
 	~/.local/share/nvim \
 	~/.config/coc/extensions/coc-clangd-data \

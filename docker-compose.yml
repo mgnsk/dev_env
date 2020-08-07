@@ -15,7 +15,6 @@ services:
     volumes:
       - "./mount:/mount"
       - "tmp:/tmp"
-      - "ssh-key:/homedir/.ssh"
       - "cache:/homedir/.cache"
       - "nvim-data:/homedir/.local/share/nvim"
       - "coc-clangd-data:/homedir/.config/coc/extensions/coc-clangd-data"
@@ -29,17 +28,16 @@ services:
       - "local-bin:/homedir/.local/bin"
     hostname: dev-env
 
-  volumes:
-    tmp:
-    ssh-key:
-    cache:
-    nvim-data:
-    coc-clangd-data:
-    coc-phpls-data:
-    direnv-data:
-    tmux-resurrect:
-    composer-global:
-    npm-global:
-    go-global:
-    python-global:
-    local-bin:
+volumes:
+  tmp:
+  cache:
+  nvim-data:
+  coc-clangd-data:
+  coc-phpls-data:
+  direnv-data:
+  tmux-resurrect:
+  composer-global:
+  npm-global:
+  go-global:
+  python-global:
+  local-bin:
