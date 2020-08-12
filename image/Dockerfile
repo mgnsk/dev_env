@@ -18,12 +18,6 @@ RUN mkdir -p /tmp/earlyoom \
 	&& make
 
 
-# Rust installation.
-FROM rust:alpine AS dev-rust
-
-RUN rustup component add rls rust-analysis rust-src
-
-
 # Development image.
 FROM build-base AS dev-env
 
@@ -46,8 +40,8 @@ COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
 COPY --from=node:alpine /opt /opt
 COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
 COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
-COPY --from=dev-rust --chown=user:user /usr/local/cargo /homedir/.cargo
-COPY --from=dev-rust --chown=user:user /usr/local/rustup /homedir/.rustup
+COPY --from=rust:alpine --chown=user:user /usr/local/cargo /homedir/.cargo
+COPY --from=rust:alpine --chown=user:user /usr/local/rustup /homedir/.rustup
 COPY ./entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh \
