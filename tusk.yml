@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 23f4850f5103d9e3821fb3fc05a638d1ffad0dee
+    default: 70a7025e41074764bb2151d5e6f7d307593c4005
 
 tasks:
   build:
