@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 70a7025e41074764bb2151d5e6f7d307593c4005
+    default: 14968e0acdac4e02c80781ff7fc4848fd3d6fe10
 
 tasks:
   build:
@@ -32,9 +32,9 @@ tasks:
       - command: mkdir -p ./mount
       # Files created by container users will be writable by the host.
       # Files created by the host will be writable by container users.
-      - command: podman unshare setfacl -Rndm u:0:rwX,g:${container_gid}:rwX ./mount
+      - command: podman unshare setfacl -Rdm m::rwX,u:0:rwX,g:${container_gid}:rwX ./mount
       # Existing host files are writable by container users.
-      - command: podman unshare setfacl -Rnm u:0:rwX,g:${container_gid}:rwX ./mount
+      - command: podman unshare setfacl -Rm m::rwX,u:0:rwX,g:${container_gid}:rwX ./mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   clean:
