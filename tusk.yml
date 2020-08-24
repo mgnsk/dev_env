@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 47081c501cba1a4515dd6e7bfa98a827882264b4
+    default: 04adf5ef9ca828af80babff946052b313f94dae8
 
 tasks:
   build:
@@ -28,13 +28,11 @@ tasks:
 
   bash:
     usage: Run bash shell as a non-root user.
+    description: The ./code dir is mounted to be accessible to the container.
     run:
-      - command: mkdir -p ./mount
-      # Files created by container users will be writable by the host.
-      # Files created by the host will be writable by container users.
-      - command: podman unshare setfacl -Rdm m::rwX,u:0:rwX,g:${container_gid}:rwX ./mount
-      # Existing host files are writable by container users.
-      - command: podman unshare setfacl -Rm m::rwX,u:0:rwX,g:${container_gid}:rwX ./mount
+      - command: rm -rf ./mount
+      - command: mkdir -p ./code ./mount
+      - command: podman unshare bindfs --map=0/${container_uid}:@0/@${container_gid} ./code ./mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   clean:
