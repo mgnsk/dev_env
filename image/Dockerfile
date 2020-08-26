@@ -47,6 +47,7 @@ COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh \
 	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	bash \
+	findutils \
 	ncurses \
 	tmux \
 	direnv \
@@ -61,7 +62,6 @@ RUN chmod +x /entrypoint.sh \
 	linux-headers \
 	clang-dev \
 	ctags \
-	fzf \
 	ripgrep \
 	curl
 
