@@ -8,7 +8,7 @@ Dependencies:
 
 * Rootless podman with CGroupsV2.
 * `podman-compose`
-* `bindfs`
+* `fuse-overlayfs`
 
 Build and run:
 

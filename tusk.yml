@@ -30,13 +30,20 @@ tasks:
     usage: Run bash shell as a non-root user.
     description: The ./code dir is mounted to be accessible to the container.
     run:
-      - command: rm -rf ./mount
-      - command: mkdir -p ./code ./mount
-      - command: podman unshare bindfs --map=0/${container_uid}:@0/@${container_gid} ./code ./mount
+      # lowerdir - an empty directory used as the read-only lowerdir
+      # workdir - fuse-overlayfs workdir
+      # mount - the merged result dir
+      - command: rm -rf lowerdir workdir mount
+      - command: mkdir -p lowerdir code workdir mount
+      # Remove the previous character special and opaque whiteout files created by the overlay.
+      - command: find ./code -type c -exec rm -f {} \;
+      - command: find . -type f -name ".wh..wh..opq" -exec rm {} \;
+      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=lowerdir,upperdir=code,workdir=workdir mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   clean:
     run:
+      - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: podman rmi mgnsk/dev-env || true
 
