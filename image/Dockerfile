@@ -1,8 +1,8 @@
-FROM alpine:edge AS build-base
+FROM alpine AS build-base
 
 RUN apk update \
 	&& apk --no-cache upgrade \
-	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	build-base \
 	coreutils \
 	shadow \
@@ -45,7 +45,7 @@ COPY --from=rust:alpine --chown=user:user /usr/local/rustup /homedir/.rustup
 COPY ./entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh \
-	&& apk --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
 	bash \
 	ncurses \
 	tmux \

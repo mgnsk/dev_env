@@ -20,32 +20,34 @@ tasks:
           --build-arg dot_commit=${dot_commit}
       - command: podman image prune -f
 
-  root:
-    usage: Run a root shell.
-    run:
-      - command: mkdir -p ./mount
-      - command: podman-compose -p dev-env run --rm --service-ports --user root dev-env /bin/bash
-
-  bash:
-    usage: Run bash shell as a non-root user.
-    description: The ./code dir is mounted to be accessible to the container.
+  clean-files:
     run:
       # lowerdir - an empty directory used as the read-only lowerdir
       # workdir - fuse-overlayfs workdir
       # mount - the merged result dir
       - command: rm -rf lowerdir workdir mount
-      - command: mkdir -p lowerdir code workdir mount
-      # Remove the previous character special and opaque whiteout files created by the overlay.
+      # Remove the character special and opaque whiteout files created by the overlay.
       - command: find ./code -type c -exec rm -f {} \;
       - command: find . -type f -name ".wh..wh..opq" -exec rm {} \;
-      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=lowerdir,upperdir=code,workdir=workdir mount
-      - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
-  clean:
+  drop-volumes:
+    run:
+      - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
+
+  drop-image:
     run:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: podman rmi mgnsk/dev-env || true
+
+  bash:
+    usage: Run bash shell as a non-root user.
+    description: The ./code dir is mounted to the container.
+    run:
+      - task: clean-files
+      - command: mkdir -p lowerdir code workdir mount
+      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=lowerdir,upperdir=code,workdir=workdir mount
+      - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   ci-build:
     run:
