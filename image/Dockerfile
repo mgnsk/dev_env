@@ -1,4 +1,4 @@
-FROM alpine AS build-base
+FROM alpine:edge AS build-base
 
 RUN apk update \
 	&& apk --no-cache upgrade \
