@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: d84392e8315ee68f4fc484b030996576ba73668c
+    default: f3a33bb6a61116853cc30ba18cef81eafdbd4444
 
 tasks:
   build:
@@ -39,6 +39,12 @@ tasks:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: podman rmi mgnsk/dev-env || true
+
+  destroy:
+    run:
+      - task: clean-files
+      - task: drop-image
+      - task: drop-volumes
 
   bash:
     usage: Run bash shell as a non-root user.
