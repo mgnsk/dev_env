@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 7453d65ab3515345058831851cbb081d67a09b8d
+    default: 33ad93122560d2fcbaf4502ec5926d277007f925
 
 tasks:
   build:
@@ -52,7 +52,7 @@ tasks:
     run:
       - task: clean-files
       - command: mkdir -p lowerdir code workdir mount
-      - command: podman unshare ./fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=lowerdir,upperdir=code,workdir=workdir,timeout=0 mount
+      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=lowerdir,upperdir=code,workdir=workdir,timeout=0 mount
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   ci-build:
