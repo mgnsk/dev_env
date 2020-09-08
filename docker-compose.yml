@@ -13,7 +13,8 @@ services:
       - ALL
     mem_limit: 2g
     volumes:
-      - "./mount:/mount"
+      - "./.fuse/code/merged:/code"
+      - "./.fuse/.ssh/merged:/homedir/.ssh"
       - "tmp:/tmp"
       - "cache:/homedir/.cache"
       - "nvim-data:/homedir/.local/share/nvim"
@@ -25,6 +26,7 @@ services:
       - "npm-global:/homedir/.npm-global"
       - "go-global:/homedir/go"
       - "python-global:/homedir/.local/lib/python3.8"
+      - "cargo-data:/homedir/.cargo"
       - "local-bin:/homedir/.local/bin"
     hostname: dev-env
 
@@ -40,4 +42,5 @@ volumes:
   npm-global:
   go-global:
   python-global:
+  cargo-data:
   local-bin:

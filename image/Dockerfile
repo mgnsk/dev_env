@@ -63,7 +63,8 @@ RUN chmod +x /entrypoint.sh \
 	clang-dev \
 	ctags \
 	ripgrep \
-	curl
+	curl \
+	openssh
 
 USER user
 
@@ -91,6 +92,6 @@ RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
 	~/.npm-global \
 	~/go
 
-WORKDIR /mount
+WORKDIR /code
 
 ENTRYPOINT ["/entrypoint.sh"]
