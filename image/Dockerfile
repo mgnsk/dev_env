@@ -92,4 +92,6 @@ RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
 	~/.npm-global \
 	~/go
 
+WORKDIR /code
+
 ENTRYPOINT ["/entrypoint.sh"]
