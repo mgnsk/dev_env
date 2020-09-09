@@ -6,7 +6,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 8c737e4330547c240e576e6a7a3dff1ede9a1989
+    default: 0af8c6d7cedc02622816432c82450a6cf28882cd
 
 tasks:
   _make-fuse:
@@ -64,12 +64,10 @@ tasks:
       - task: drop-vols
       - task: drop-image
 
-
   ssh-keygen:
     run:
       - task: _recreate-vols
-      - command: |
-      - podman-compose -p dev-env run --rm dev-env bash -c 'read -p "Enter your email:" email; ssh-keygen -t rsa -b 4096 -C $email -f /homedir/.ssh/id_rsa'
+      - command: podman-compose -p dev-env run --rm dev-env bash -c 'read -p "Enter your email:" email; ssh-keygen -t rsa -b 4096 -C $email -f /homedir/.ssh/id_rsa'
 
   ci-build:
     run:
