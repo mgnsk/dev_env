@@ -11,23 +11,15 @@ options:
 tasks:
   _make-fuse:
     run:
-      - command: mkdir -p code .ssh
+      - command: mkdir -p code
       - command: mkdir -p .fuse/code/{lowerdir,workdir,merged}
-      - command: mkdir -p .fuse/.ssh/{lowerdir,workdir,merged}
       - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.fuse/code/lowerdir,upperdir=code,workdir=.fuse/code/workdir,timeout=0 .fuse/code/merged
-      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.fuse/.ssh/lowerdir,upperdir=.ssh,workdir=.fuse/.ssh/workdir,timeout=0 .fuse/.ssh/merged
 
   _clean-fuse:
     run:
       - command: rm -rf .fuse
       - command: find ./code -type c -exec rm -f {} \;
       - command: find ./code -type f -name ".wh..wh..opq" -exec rm {} \;
-
-  _recreate-vols:
-    description: Recreate mounts except ssh key.
-    run:
-      - task: _clean-fuse
-      - task: _make-fuse
 
   build:
     run:
@@ -43,7 +35,8 @@ tasks:
   bash:
     usage: Run bash shell as a non-root user.
     run:
-      - task: _recreate-vols
+      - task: _clean-fuse
+      - task: _make-fuse
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
 
   drop-vols:
@@ -59,15 +52,9 @@ tasks:
       - command: podman rmi mgnsk/dev-env || true
   
   destroy:
-    usage: Destroy all volumes and images. Keeps the ssh keys.
     run:
       - task: drop-vols
       - task: drop-image
-
-  ssh-keygen:
-    run:
-      - task: _recreate-vols
-      - command: podman-compose -p dev-env run --rm dev-env bash -c 'read -p "Enter your email:" email; ssh-keygen -t rsa -b 4096 -C $email -f /homedir/.ssh/id_rsa'
 
   ci-build:
     run:
