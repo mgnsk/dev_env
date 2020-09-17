@@ -6,14 +6,14 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 508e8e3a2f677287096eb71d5adc6263718d14b1
+    default: e4bf174effb1fb0d419ae8964acec98672ae9442
 
 tasks:
   _make-fuse:
     run:
       - command: mkdir -p code
       - command: mkdir -p .fuse/code/{lowerdir,workdir,merged}
-      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.fuse/code/lowerdir,upperdir=code,workdir=.fuse/code/workdir,timeout=0 .fuse/code/merged
+      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.fuse/code/lowerdir,upperdir=code,workdir=.fuse/code/workdir,noxattrs=1,fsync=1,threaded=1 .fuse/code/merged
 
   _clean-fuse:
     run:
