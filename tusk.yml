@@ -9,13 +9,19 @@ options:
     default: e4bf174effb1fb0d419ae8964acec98672ae9442
 
 tasks:
-  _make-fuse:
+  _make-user-mounts:
     run:
       - command: mkdir -p code
       - command: mkdir -p .fuse/code/{lowerdir,workdir,merged}
       - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.fuse/code/lowerdir,upperdir=code,workdir=.fuse/code/workdir,noxattrs=1,fsync=1,threaded=1 .fuse/code/merged
 
-  _clean-fuse:
+  _make-root-mounts:
+    run:
+      - command: mkdir -p code
+      - command: mkdir -p .fuse/code
+      - command: ln -s $PWD/code $PWD/.fuse/code/merged
+
+  _clean-mounts:
     run:
       - command: rm -rf .fuse
       - command: find ./code -type c -exec rm -f {} \;
@@ -35,9 +41,16 @@ tasks:
   bash:
     usage: Run bash shell as a non-root user.
     run:
-      - task: _clean-fuse
-      - task: _make-fuse
+      - task: _clean-mounts
+      - task: _make-user-mounts
       - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
+
+  root:
+    usage: Run a root shell.
+    run:
+      - task: _clean-mounts
+      - task: _make-root-mounts
+      - command: podman-compose -p dev-env run --rm --service-ports --user root dev-env /bin/bash
 
   drop-vols:
     run:

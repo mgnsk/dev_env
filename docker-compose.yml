@@ -28,6 +28,9 @@ services:
       - "cargo-data:/homedir/.cargo"
       - "local-bin:/homedir/.local/bin"
     hostname: dev-env
+    ports:
+      - 1234
+      - 5000
 
 volumes:
   tmp:

@@ -64,7 +64,8 @@ RUN chmod +x /entrypoint.sh \
 	ctags \
 	ripgrep \
 	curl \
-	openssh
+	openssh \
+	openssl-dev
 
 USER user
 
