@@ -52,20 +52,23 @@ tasks:
       - task: _make-root-mounts
       - command: podman-compose -p dev-env run --rm --service-ports --user root dev-env /bin/bash
 
-  drop-vols:
+  kill:
     run:
       - command: podman pod kill dev-env || true
-      - task: _clean-fuse
+
+  drop-vols:
+    run:
+      - task: _clean-mounts
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
 
   drop-image:
     run:
-      - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: podman rmi mgnsk/dev-env || true
   
   destroy:
     run:
+      - task: kill
       - task: drop-vols
       - task: drop-image
 
