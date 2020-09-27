@@ -1,7 +1,8 @@
+---
 version: "2.4"
 services:
-  dev-env:
-    image: mgnsk/dev-env:latest
+  toolbox:
+    image: mgnsk/toolbox:latest
     build:
       context: ./image
       args:
@@ -9,8 +10,8 @@ services:
         - gid
         - dot_url
         - dot_commit
-    cap_drop:
-      - ALL
+    # cap_drop:
+    # - ALL
     mem_limit: 2g
     volumes:
       - ".fuse/code/merged:/code"
@@ -27,7 +28,7 @@ services:
       - "python-global:/homedir/.local/lib/python3.8"
       - "cargo-data:/homedir/.cargo"
       - "local-bin:/homedir/.local/bin"
-    hostname: dev-env
+    hostname: toolbox
     ports:
       - 1234
       - 5000

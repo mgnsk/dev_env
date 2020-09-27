@@ -1,3 +1,4 @@
+---
 options:
   container_uid:
     default: 3000
@@ -6,7 +7,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: e4bf174effb1fb0d419ae8964acec98672ae9442
+    default: c74d07036ddde80ee8c4ef12b41c07aac01df868
 
 tasks:
   _make-user-mounts:
@@ -32,6 +33,7 @@ tasks:
       - command: >
           podman-compose
           build
+          --pull
           --build-arg uid=${container_uid}
           --build-arg gid=${container_gid}
           --build-arg dot_url=${dot_url}
@@ -43,27 +45,27 @@ tasks:
     run:
       - task: _clean-mounts
       - task: _make-user-mounts
-      - command: podman-compose -p dev-env run --rm --service-ports dev-env /bin/bash
+      - command: podman-compose -p dev-env run --rm --service-ports toolbox /bin/bash
 
   root:
     usage: Run a root shell.
     run:
       - task: _clean-mounts
       - task: _make-root-mounts
-      - command: podman-compose -p dev-env run --rm --service-ports --user root dev-env /bin/bash
+      - command: podman-compose -p dev-env run --rm --service-ports --user root toolbox /bin/bash
 
   drop-vols:
     run:
       - command: podman pod kill dev-env || true
-      - task: _clean-fuse
+      - task: _clean-mounts
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
 
   drop-image:
     run:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
-      - command: podman rmi mgnsk/dev-env || true
-  
+      - command: podman rmi mgnsk/toolbox || true
+
   destroy:
     run:
       - task: drop-vols
@@ -79,11 +81,11 @@ tasks:
           --build-arg gid=${container_gid}
           --build-arg dot_url=${dot_url}
           --build-arg dot_commit=${dot_commit}
-          -t mgnsk/dev-env:latest
+          -t mgnsk/toolbox:latest
           ./image
 
   ci-push:
     run:
       command: |
         echo "$DOCKER_TOKEN" | docker login -u mgnsk --password-stdin
-        docker push mgnsk/dev-env:latest
+        docker push mgnsk/toolbox:latest

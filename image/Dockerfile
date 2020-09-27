@@ -1,8 +1,8 @@
-FROM alpine:edge AS build-base
+FROM alpine:latest AS build-base
 
 RUN apk update \
 	&& apk --no-cache upgrade \
-	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	&& apk --no-cache add \
 	build-base \
 	coreutils \
 	shadow \
@@ -15,11 +15,13 @@ FROM build-base AS dev-earlyoom
 RUN mkdir -p /tmp/earlyoom \
 	&& cd /tmp/earlyoom \
 	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
-	&& make
+	&& make \
+	&& mv earlyoom /usr/bin/ \
+	&& rm -rf /tmp/earlyoom
 
 
 # Development image.
-FROM build-base AS dev-env
+FROM build-base AS dev-base
 
 ARG uid
 ARG gid
@@ -36,26 +38,31 @@ RUN addgroup -g ${gid} user \
 	&& rm -rf /root \
 	&& ln -s /homedir /root
 
-COPY --from=dev-earlyoom /tmp/earlyoom/earlyoom /usr/bin/earlyoom
+COPY --from=dev-earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
+COPY --from=golang:alpine /usr/local/go /usr/local/go
 COPY --from=node:alpine /opt /opt
 COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
 COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
 COPY --from=rust:alpine --chown=user:user /usr/local/cargo /homedir/.cargo
 COPY --from=rust:alpine --chown=user:user /usr/local/rustup /homedir/.rustup
+COPY --from=hadolint/hadolint /bin/hadolint /usr/bin/hadolint
+
 COPY ./entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh \
-	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	&& apk --no-cache add \
 	bash \
 	findutils \
 	ncurses \
 	tmux \
-	direnv \
 	tree \
-	most \
 	neovim \
 	luajit \
-	go \
+	vint \
+	shellcheck \
+	protoc \
+	tidyhtml \
+	ruby \
 	perl \
 	py3-pip \
 	python3-dev \
@@ -65,15 +72,22 @@ RUN chmod +x /entrypoint.sh \
 	ripgrep \
 	curl \
 	openssh \
-	openssl-dev
-
-USER user
+	openssl-dev \
+	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
+	direnv \
+	most
 
 ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.cargo/bin:$PATH \
 	GOPATH=/homedir/go
 
+
+FROM dev-base
+
+ENV USER=user
 ARG dot_url
 ARG dot_commit
+
+USER user
 
 RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
     && rm -r ~/dotfiles-tmp/ \
