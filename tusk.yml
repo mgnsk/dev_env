@@ -7,7 +7,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: be01619ca4e44cd7d9d8e47365e40652777c8a48
+    default: 675ca2bcb9f6aef225aac3e01ec5808e0c9573b5
 
 tasks:
   _make-user-mounts:
