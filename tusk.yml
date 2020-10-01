@@ -7,7 +7,7 @@ options:
   dot_url:
     default: https://github.com/mgnsk/dotfiles.git
   dot_commit:
-    default: 675ca2bcb9f6aef225aac3e01ec5808e0c9573b5
+    default: 4f2536174b4d48cf81b929a492ab8ffafd7ca5f4
 
 tasks:
   _make-user-mounts:
@@ -57,6 +57,7 @@ tasks:
   kill:
     run:
       - command: podman pod kill dev-env || true
+      - command: podman pod rm dev-env || true
 
   drop-vols:
     run:
@@ -65,7 +66,6 @@ tasks:
 
   drop-image:
     run:
-      - command: podman pod rm dev-env || true
       - command: podman rmi mgnsk/toolbox || true
 
   destroy:
