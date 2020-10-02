@@ -17,6 +17,7 @@ services:
       - ".fuse/code/merged:/code"
       - "tmp:/tmp"
       - "cache:/homedir/.cache"
+      - "bash-history:/homedir/.bash_history"
       - "nvim-data:/homedir/.local/share/nvim"
       - "coc-clangd-data:/homedir/.config/coc/extensions/coc-clangd-data"
       - "coc-phpls-data:/homedir/.config/coc/extensions/coc-phpls-data"
@@ -36,6 +37,7 @@ services:
 volumes:
   tmp:
   cache:
+  bash-history:
   nvim-data:
   coc-clangd-data:
   coc-phpls-data:

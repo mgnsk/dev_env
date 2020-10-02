@@ -95,6 +95,7 @@ RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
 	&& bash ~/setup.sh \
 	&& rm -rf ~/.cache \
 	&& rm -r /tmp/* \
+	&& touch ~/.bash_history \
 	# Set up volumes.
 	&& mkdir -p \
 	~/.cache \
