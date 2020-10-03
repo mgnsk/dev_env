@@ -41,11 +41,9 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - run: git submodule init
-      - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
-
       - uses: actions/checkout@v2
+        with:
+          submodules: true
 
       - name: Build image
         run: docker build . --file Dockerfile --build-arg uid=3000 --build-arg gid=3000 --tag $IMAGE_NAME
