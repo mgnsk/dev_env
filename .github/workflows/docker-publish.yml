@@ -9,6 +9,13 @@ on:
     # Publish `v1.2.3` tags as releases.
     #tags:
     #  - v*
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: echo TODO
 
 env:
   IMAGE_NAME: toolbox
