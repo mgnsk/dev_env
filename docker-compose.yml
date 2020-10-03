@@ -1,15 +1,22 @@
 ---
 version: "2.4"
 services:
-  toolbox:
-    image: mgnsk/toolbox:latest
+  base:
+    image: mgnsk/toolbox-base:latest
     build:
       context: .
+      dockerfile: Dockerfile.base
       args:
         - uid
         - gid
-        - dot_url
-        - dot_commit
+
+  toolbox:
+    image: mgnsk/toolbox:latest
+    depends_on:
+      - base
+    build:
+      context: .
+      dockerfile: Dockerfile
     # cap_drop:
     # - ALL
     mem_limit: 2g

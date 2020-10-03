@@ -1,7 +1,5 @@
 ### Immutable development image
 
-[![Build Status](https://travis-ci.com/mgnsk/dev_env.svg?branch=master)](https://travis-ci.com/mgnsk/dev_env)
-
 This image serves the purpose of documenting my default environment.
 
 Dependencies:
