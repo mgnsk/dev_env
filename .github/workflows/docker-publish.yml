@@ -41,6 +41,7 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
+      - run: git submodule init
       - name: Checkout submodules
         uses: textbook/git-checkout-submodule-action@master
 
