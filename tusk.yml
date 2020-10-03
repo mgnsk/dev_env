@@ -77,7 +77,7 @@ tasks:
           --build-arg uid=${container_uid}
           --build-arg gid=${container_gid}
           -t mgnsk/toolbox:latest
-          ./image
+          .
 
   ci-push:
     run:
