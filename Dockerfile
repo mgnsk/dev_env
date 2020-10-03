@@ -54,6 +54,7 @@ RUN chmod +x /entrypoint.sh \
 	bash \
 	findutils \
 	ncurses \
+	bind-tools \
 	tmux \
 	tree \
 	neovim \
@@ -83,16 +84,13 @@ ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.ca
 
 FROM dev-base
 
+COPY --chown=user:user /dotfiles /homedir
+
 ENV USER=user
-ARG dot_url
-ARG dot_commit
 
 USER user
 
-RUN git clone --separate-git-dir=$HOME/.dotfiles ${dot_url} $HOME/dotfiles-tmp \
-    && rm -r ~/dotfiles-tmp/ \
-	&& /usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME reset --hard ${dot_commit} \
-	&& bash ~/setup.sh \
+RUN bash ~/setup.sh \
 	&& rm -rf ~/.cache \
 	&& rm -r /tmp/* \
 	&& touch ~/.bash_history \

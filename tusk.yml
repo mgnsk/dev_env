@@ -4,27 +4,23 @@ options:
     default: 3000
   container_gid:
     default: 3000
-  dot_url:
-    default: https://github.com/mgnsk/dotfiles.git
-  dot_commit:
-    default: 205b47921969dfadc592f0c547ed8edc8ae43850
 
 tasks:
   _make-user-mounts:
     run:
       - command: mkdir -p code
-      - command: mkdir -p .fuse/code/{lowerdir,workdir,merged}
-      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.fuse/code/lowerdir,upperdir=code,workdir=.fuse/code/workdir,noxattrs=1,fsync=1,threaded=1 .fuse/code/merged
+      - command: mkdir -p .mount/code/{lowerdir,workdir,merged}
+      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.mount/code/lowerdir,upperdir=code,workdir=.mount/code/workdir,noxattrs=1,fsync=1,threaded=1 .mount/code/merged
 
   _make-root-mounts:
     run:
       - command: mkdir -p code
-      - command: mkdir -p .fuse/code
-      - command: ln -s $PWD/code $PWD/.fuse/code/merged
+      - command: mkdir -p .mount/code
+      - command: ln -s $PWD/code $PWD/.mount/code/merged
 
   _clean-mounts:
     run:
-      - command: rm -rf .fuse
+      - command: rm -rf .mount
       - command: find ./code -type c -exec rm -f {} \;
       - command: find ./code -type f -name ".wh..wh..opq" -exec rm {} \;
 
@@ -36,8 +32,6 @@ tasks:
           --pull
           --build-arg uid=${container_uid}
           --build-arg gid=${container_gid}
-          --build-arg dot_url=${dot_url}
-          --build-arg dot_commit=${dot_commit}
       - command: podman image prune -f
 
   bash:
@@ -82,8 +76,6 @@ tasks:
           --pull
           --build-arg uid=${container_uid}
           --build-arg gid=${container_gid}
-          --build-arg dot_url=${dot_url}
-          --build-arg dot_commit=${dot_commit}
           -t mgnsk/toolbox:latest
           ./image
 
