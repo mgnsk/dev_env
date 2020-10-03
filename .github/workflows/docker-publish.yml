@@ -1,3 +1,4 @@
+
 name: Docker
 
 on:
@@ -7,20 +8,35 @@ on:
       - master
 
     # Publish `v1.2.3` tags as releases.
-    #tags:
-    #  - v*
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: echo TODO
+    tags:
+      - v*
+
+  # Run tests for any PRs.
+  pull_request:
 
 env:
+  # TODO: Change variable to your image's name.
   IMAGE_NAME: toolbox
 
+jobs:
+  # Run tests.
+  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          echo TODO
+
+  # Push image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
   push:
+    # Ensure test job passes before pushing image.
+    needs: test
+
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -28,7 +44,7 @@ env:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run: docker build . --file Dockerfile --build-arg uid=3000 --build-arg gid=3000 --tag $IMAGE_NAME
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into GitHub Container Registry
       # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
@@ -55,3 +71,4 @@ env:
 
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
+
