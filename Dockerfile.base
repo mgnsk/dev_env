@@ -59,7 +59,6 @@ RUN chmod +x /entrypoint.sh \
 	tree \
 	neovim \
 	luajit \
-	vint \
 	shellcheck \
 	protoc \
 	tidyhtml \
