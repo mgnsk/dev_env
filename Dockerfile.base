@@ -1,81 +1,62 @@
-FROM alpine:latest AS build-base
+FROM ubuntu:rolling
 
-RUN apk update \
-	&& apk --no-cache upgrade \
-	&& apk --no-cache add \
-	build-base \
-	coreutils \
-	shadow \
-	git
+ENV DEBIAN_FRONTEND=noninteractive
 
+RUN apt-get update
 
-# earlyoom installation.
-FROM build-base AS dev-earlyoom
-
-RUN mkdir -p /tmp/earlyoom \
+RUN apt-get install --no-install-recommends -y \
+	build-essential \
+	ca-certificates \
+	git \
+	#bash \
+	#findutils \
+	#ncurses \
+	dnsutils \
+	tmux \
+	tree \
+	neovim \
+	luajit \
+	shellcheck \
+	#protoc \
+	tidy \
+	ruby \
+	perl \
+	python3-pip \
+	#python3-dev \
+	#linux-headers \
+	clang \
+	universal-ctags \
+	ripgrep \
+	curl \
+	#openssh \
+	#openssl-dev \
+	direnv \
+	most \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& mkdir -p /tmp/earlyoom \
 	&& cd /tmp/earlyoom \
 	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
 	&& make \
 	&& mv earlyoom /usr/bin/ \
 	&& rm -rf /tmp/earlyoom
 
-
-# Development image.
-FROM build-base AS dev-base
-
-ARG uid
-ARG gid
-
-RUN addgroup -g ${gid} user \
-	&& groupmod -g ${gid} user \
-	&& adduser \
-	--disabled-password \
-	--gecos "" \
-	--home /homedir \
-	--ingroup user \
-	--uid ${uid} \
-	user \
-	&& rm -rf /root \
-	&& ln -s /homedir /root
-
-COPY --from=dev-earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
 COPY --from=golang:alpine /usr/local/go /usr/local/go
+
+RUN /usr/local/go/bin/go version
+
+RUN go version
+
 COPY --from=node:alpine /opt /opt
-COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
-COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
-COPY --from=rust:alpine --chown=user:user /usr/local/cargo /homedir/.cargo
-COPY --from=rust:alpine --chown=user:user /usr/local/rustup /homedir/.rustup
 COPY --from=hadolint/hadolint /bin/hadolint /usr/bin/hadolint
+
+#RUN apk update \
+	#&& apk --no-cache upgrade \
+	#&& apk --no-cache add \
+	#build-base \
+	#coreutils \
+	#shadow \
+	#git
 
 COPY ./entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh \
-	&& apk --no-cache add \
-	bash \
-	findutils \
-	ncurses \
-	bind-tools \
-	tmux \
-	tree \
-	neovim \
-	luajit \
-	shellcheck \
-	protoc \
-	tidyhtml \
-	ruby \
-	perl \
-	py3-pip \
-	python3-dev \
-	linux-headers \
-	clang-dev \
-	ctags \
-	ripgrep \
-	curl \
-	openssh \
-	openssl-dev \
-	&& apk --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing add \
-	direnv \
-	most
-
-ENV PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.cargo/bin:$PATH \
-	GOPATH=/homedir/go
+RUN chmod +x /entrypoint.sh

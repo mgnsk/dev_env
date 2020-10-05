@@ -61,6 +61,7 @@ tasks:
   drop-image:
     run:
       - command: podman rmi mgnsk/toolbox || true
+      - command: podman rmi mgnsk/toolbox-base || true
 
   destroy:
     run:
