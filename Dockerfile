@@ -2,28 +2,27 @@ FROM mgnsk/toolbox-base:latest
 
 ARG uid
 ARG gid
+ARG user=user
+ARG group=user
 
-RUN addgroup --gid ${gid} user \
-	&& groupmod -g ${gid} user \
+RUN addgroup --gid ${gid} ${group} \
 	&& adduser \
 	--disabled-password \
 	--gecos "" \
 	--home /homedir \
-	--ingroup user \
+	--ingroup ${group} \
 	--uid ${uid} \
-	user \
+	${user} \
 	&& rm -rf /root \
 	&& ln -s /homedir /root
 
-COPY --chown=user:user /dotfiles /homedir
-COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
-COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
-COPY --from=rust:alpine --chown=user:user /usr/local/cargo /homedir/.cargo
-COPY --from=rust:alpine --chown=user:user /usr/local/rustup /homedir/.rustup
+COPY --chown=${user}:${group} /dotfiles /homedir
+#COPY --from=node:alpine --chown=user:user /usr/local/bin /homedir/.npm-global/bin
+#COPY --from=node:alpine --chown=user:user /usr/local/lib /homedir/.npm-global/lib
+#COPY --from=rust:alpine --chown=user:user /usr/local/cargo /homedir/.cargo
+#COPY --from=rust:alpine --chown=user:user /usr/local/rustup /homedir/.rustup
 
-ENV USER=user \
-	PATH=/usr/local/go/bin:/homedir/go/bin:/homedir/.npm-global/bin:/homedir/.cargo/bin:$PATH \
-	GOPATH=/homedir/go
+ENV USER=user
 
 USER user
 

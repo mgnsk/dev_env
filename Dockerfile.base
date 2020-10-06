@@ -1,15 +1,30 @@
-FROM ubuntu:rolling
+FROM ubuntu:rolling as build
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update
+RUN apt-get update && apt-get install --no-install-recommends -y \
+	build-essential \
+	coreutils \
+	ca-certificates \
+	git
+
+
+FROM build as earlyoom
+
+WORKDIR /tmp/earlyoom
+
+RUN git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
+	&& make \
+	&& mv earlyoom /usr/bin/ \
+	&& rm -rf /tmp/earlyoom
+
+
+FROM build as base
 
 RUN apt-get install --no-install-recommends -y \
-	build-essential \
-	ca-certificates \
-	git \
-	#bash \
+	wget \
 	#findutils \
+	#shadow \
 	#ncurses \
 	dnsutils \
 	tmux \
@@ -17,7 +32,6 @@ RUN apt-get install --no-install-recommends -y \
 	neovim \
 	luajit \
 	shellcheck \
-	#protoc \
 	tidy \
 	ruby \
 	perl \
@@ -25,38 +39,22 @@ RUN apt-get install --no-install-recommends -y \
 	#python3-dev \
 	#linux-headers \
 	clang \
+	npm \
 	universal-ctags \
 	ripgrep \
 	curl \
-	#openssh \
-	#openssl-dev \
 	direnv \
 	most \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& mkdir -p /tmp/earlyoom \
-	&& cd /tmp/earlyoom \
-	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
-	&& make \
-	&& mv earlyoom /usr/bin/ \
-	&& rm -rf /tmp/earlyoom
+	&& rm -rf /var/lib/apt/lists/*
 
-COPY --from=golang:alpine /usr/local/go /usr/local/go
-
-RUN /usr/local/go/bin/go version
-
-RUN go version
-
-COPY --from=node:alpine /opt /opt
+COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
 COPY --from=hadolint/hadolint /bin/hadolint /usr/bin/hadolint
-
-#RUN apk update \
-	#&& apk --no-cache upgrade \
-	#&& apk --no-cache add \
-	#build-base \
-	#coreutils \
-	#shadow \
-	#git
-
 COPY ./entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
+
+RUN mkdir -p /usr/local \
+	&& bash -c "set -e; curl https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz | tar xzf - -C /usr/local --strip-components=1"
+
+ENV PATH=/usr/local/go/bin:$PATH \
+	GOPATH=/homedir/go
