@@ -1,28 +1,38 @@
-FROM ubuntu:rolling as build
+FROM ubuntu:rolling AS rolling
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update
+
+
+FROM rolling AS build
+
+RUN apt-get install --no-install-recommends -y \
 	build-essential \
 	coreutils \
 	ca-certificates \
 	git
 
 
-FROM build as earlyoom
+FROM build AS earlyoom
 
 WORKDIR /tmp/earlyoom
 
-RUN git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
+RUN rm -rf /var/lib/apt/lists/* \
+	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
 	&& make \
 	&& mv earlyoom /usr/bin/ \
 	&& rm -rf /tmp/earlyoom
 
 
-FROM build as base
+FROM build AS base
+
+ARG uid
+ARG gid
+ARG user=user
+ARG group=user
 
 RUN apt-get install --no-install-recommends -y \
-	wget \
 	dnsutils \
 	tmux \
 	tree \
@@ -41,16 +51,32 @@ RUN apt-get install --no-install-recommends -y \
 	curl \
 	direnv \
 	most \
-	&& rm -rf /var/lib/apt/lists/*
+	&& rm -rf /var/lib/apt/lists/* \
+	&& addgroup --gid ${gid} ${group} \
+	&& adduser \
+	--disabled-password \
+	--gecos "" \
+	--home /homedir \
+	--ingroup ${group} \
+	--uid ${uid} \
+	${user} \
+	&& rm -rf /root \
+	&& ln -s /homedir /root
 
 COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
 COPY --from=hadolint/hadolint /bin/hadolint /usr/bin/hadolint
 COPY ./entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
-
-RUN mkdir -p /usr/local \
+RUN chmod +x /entrypoint.sh \
+	&& mkdir -p /usr/local \
 	&& bash -c "set -e; curl https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz | tar xzf - -C /usr/local --strip-components=1"
 
+USER user
+
+RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
+
 ENV PATH=/usr/local/go/bin:$PATH \
-	GOPATH=/homedir/go
+	GOPATH=/homedir/go \
+	USER=user
+
+ENTRYPOINT ["/entrypoint.sh"]
