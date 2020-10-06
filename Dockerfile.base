@@ -23,9 +23,6 @@ FROM build as base
 
 RUN apt-get install --no-install-recommends -y \
 	wget \
-	#findutils \
-	#shadow \
-	#ncurses \
 	dnsutils \
 	tmux \
 	tree \
@@ -37,7 +34,6 @@ RUN apt-get install --no-install-recommends -y \
 	perl \
 	python3-pip \
 	python3-dev \
-	#linux-headers \
 	clang \
 	npm \
 	universal-ctags \
