@@ -26,10 +26,9 @@ ENV USER=user
 
 USER user
 
-# TODO install yarn in setup.sh? that would create a dependency loop
-RUN npm install -g yarn \
-	&& bash -c "source ~/.bashrc && ~/setup.sh" \
+RUN bash ~/setup.sh \
 	&& rm -rf ~/.cache \
+	# TODO Clean up in setup.sh
 	&& rm -r /tmp/* \
 	&& touch ~/.bash_history \
 	# Set up volumes.
