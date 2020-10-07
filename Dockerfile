@@ -1,6 +1,9 @@
 FROM mgnsk/toolbox-base:latest
 
-COPY --chown=user:user /dotfiles /homedir
+ARG user
+ARG group
+
+COPY --chown=${user}:${group} /dotfiles /homedir
 
 RUN bash ~/setup.sh \
 	&& rm -rf ~/.cache \

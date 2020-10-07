@@ -1,13 +1,15 @@
-FROM archlinux AS rolling
-
-RUN pacman -Syu --noconfirm
+FROM fedora:33 AS build
 
 ARG uid
 ARG gid
-ARG user=user
-ARG group=user
+ARG user
+ARG group
 
-RUN groupadd -g ${gid} ${group} \
+RUN dnf upgrade -y \
+	&& dnf groupinstall -y "C Development Tools and Libraries" \
+	&& dnf install --setopt=install_weak_deps=False -y \
+	git \
+	&& groupadd -g ${gid} ${group} \
 	&& useradd \
 	--home-dir /homedir \
 	-g ${group} \
@@ -16,55 +18,58 @@ RUN groupadd -g ${gid} ${group} \
 	&& rm -rf /root \
 	&& ln -s /homedir /root
 
-RUN pacman -S --needed --noconfirm \
-	base-devel \
-	sudo \
-# TODO sudo
-	#coreutils \
-	ca-certificates \
-	git
-	#bind \
-	#tmux \
-	#tree \
-	#neovim \
-	#luajit \
-	#shellcheck \
-	#tidy \
-	#ruby \
-	#perl \
-	#python-pip \
-	#clang \
-	#npm \
-	#go \
-	#rustup \
-	#ctags \
-	#ripgrep \
-	#curl \
-	#most \
-	#earlyoom
 
-	#direnv \
-	#python3-dev \
+FROM build AS earlyoom
 
-RUN mkdir -p /tmp/aur \
-	&& chown nobody:nobody /tmp/aur \
-	&& sudo -u nobody git clone https://aur.archlinux.org/yay.git /tmp/aur/yay \
-	&& cd /tmp/aur/yay
-	&& sudo -u nobody makepkg -si
+WORKDIR /tmp/earlyoom
 
-# TODO hadolint-bin
+RUN git clone https://github.com/rfjakob/earlyoom.git . \
+	&& make \
+	&& mv earlyoom /usr/bin/ \
+	&& dnf clean all \
+	&& rm -rf /tmp/earlyoom
+
+
+FROM build AS rust
+
+RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
+	&& dnf clean all
+
+
+FROM build
+
+ARG user
+ARG group
 
 COPY ./entrypoint.sh /entrypoint.sh
+COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
+COPY --chown=${user}:${group} --from=rust /homedir/.cargo /homedir/.cargo
+COPY --chown=${user}:${group} --from=rust /homedir/.rustup /homedir/.rustup
 
-RUN chmod +x /entrypoint.sh
-	#&& mkdir -p /usr/local \
-	#&& bash -c "set -e; curl https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz | tar xzf - -C /usr/local --strip-components=1"
+RUN dnf install --setopt=install_weak_deps=False -y \
+	bind-utils \
+	tmux \
+	tree \
+	neovim \
+	luajit \
+	ShellCheck \
+	tidy \
+	rubygems \
+	perl \
+	python-pip \
+	python-devel \
+	clang \
+	npm \
+	go \
+	ripgrep \
+	most \
+	direnv \
+	hadolint \
+	&& dnf clean all \
+	&& chmod +x /entrypoint.sh
 
-USER user
+USER ${user}
 
-#RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
-
-ENV GOPATH=/homedir/go \
-	USER=user
+ENV USER=${user}
 
 ENTRYPOINT ["/entrypoint.sh"]
