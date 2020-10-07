@@ -1,82 +1,70 @@
-FROM ubuntu:rolling AS rolling
+FROM archlinux AS rolling
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update
-
-
-FROM rolling AS build
-
-RUN apt-get install --no-install-recommends -y \
-	build-essential \
-	coreutils \
-	ca-certificates \
-	git
-
-
-FROM build AS earlyoom
-
-WORKDIR /tmp/earlyoom
-
-RUN rm -rf /var/lib/apt/lists/* \
-	&& git clone --depth 1 https://github.com/rfjakob/earlyoom.git . \
-	&& make \
-	&& mv earlyoom /usr/bin/ \
-	&& rm -rf /tmp/earlyoom
-
-
-FROM build AS base
+RUN pacman -Syu --noconfirm
 
 ARG uid
 ARG gid
 ARG user=user
 ARG group=user
 
-RUN apt-get install --no-install-recommends -y \
-	dnsutils \
-	tmux \
-	tree \
-	neovim \
-	luajit \
-	shellcheck \
-	tidy \
-	ruby \
-	perl \
-	python3-pip \
-	python3-dev \
-	clang \
-	npm \
-	universal-ctags \
-	ripgrep \
-	curl \
-	direnv \
-	most \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& addgroup --gid ${gid} ${group} \
-	&& adduser \
-	--disabled-password \
-	--gecos "" \
-	--home /homedir \
-	--ingroup ${group} \
+RUN groupadd -g ${gid} ${group} \
+	&& useradd \
+	--home-dir /homedir \
+	-g ${group} \
 	--uid ${uid} \
 	${user} \
 	&& rm -rf /root \
 	&& ln -s /homedir /root
 
-COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
-COPY --from=hadolint/hadolint /bin/hadolint /usr/bin/hadolint
+RUN pacman -S --needed --noconfirm \
+	base-devel \
+	sudo \
+# TODO sudo
+	#coreutils \
+	ca-certificates \
+	git
+	#bind \
+	#tmux \
+	#tree \
+	#neovim \
+	#luajit \
+	#shellcheck \
+	#tidy \
+	#ruby \
+	#perl \
+	#python-pip \
+	#clang \
+	#npm \
+	#go \
+	#rustup \
+	#ctags \
+	#ripgrep \
+	#curl \
+	#most \
+	#earlyoom
+
+	#direnv \
+	#python3-dev \
+
+RUN mkdir -p /tmp/aur \
+	&& chown nobody:nobody /tmp/aur \
+	&& sudo -u nobody git clone https://aur.archlinux.org/yay.git /tmp/aur/yay \
+	&& cd /tmp/aur/yay
+	&& sudo -u nobody makepkg -si
+
+# TODO hadolint-bin
+
 COPY ./entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh \
-	&& mkdir -p /usr/local \
-	&& bash -c "set -e; curl https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz | tar xzf - -C /usr/local --strip-components=1"
+RUN chmod +x /entrypoint.sh
+	#&& mkdir -p /usr/local \
+	#&& bash -c "set -e; curl https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz | tar xzf - -C /usr/local --strip-components=1"
 
 USER user
 
-RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
+#RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
 
-ENV PATH=/usr/local/go/bin:$PATH \
-	GOPATH=/homedir/go \
+ENV GOPATH=/homedir/go \
 	USER=user
 
 ENTRYPOINT ["/entrypoint.sh"]
