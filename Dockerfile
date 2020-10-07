@@ -1,14 +1,12 @@
 FROM mgnsk/toolbox-base:latest
 
-COPY --chown=user:user /dotfiles /homedir
+ARG user
+ARG group
 
-ENV USER=user
-
-USER user
+COPY --chown=${user}:${group} /dotfiles /homedir
 
 RUN bash ~/setup.sh \
 	&& rm -rf ~/.cache \
-	&& rm -r /tmp/* \
 	&& touch ~/.bash_history \
 	# Set up volumes.
 	&& mkdir -p \
@@ -23,5 +21,3 @@ RUN bash ~/setup.sh \
 	~/go
 
 WORKDIR /code
-
-ENTRYPOINT ["/entrypoint.sh"]

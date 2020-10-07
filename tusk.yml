@@ -4,6 +4,10 @@ options:
     default: 3000
   container_gid:
     default: 3000
+  container_user:
+    default: user
+  container_group:
+    default: user
 
 tasks:
   _make-user-mounts:
@@ -32,6 +36,8 @@ tasks:
           --pull
           --build-arg uid=${container_uid}
           --build-arg gid=${container_gid}
+          --build-arg user=${container_user}
+          --build-arg group=${container_group}
       - command: podman image prune -f
 
   bash:
@@ -61,6 +67,7 @@ tasks:
   drop-image:
     run:
       - command: podman rmi mgnsk/toolbox || true
+      - command: podman rmi mgnsk/toolbox-base || true
 
   destroy:
     run:
