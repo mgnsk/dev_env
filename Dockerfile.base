@@ -48,6 +48,7 @@ COPY --chown=${user}:${group} --from=rust /homedir/.rustup /homedir/.rustup
 
 RUN dnf install --setopt=install_weak_deps=False -y \
 	bind-utils \
+	diffutils \
 	tmux \
 	tree \
 	neovim \
