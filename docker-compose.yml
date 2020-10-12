@@ -38,8 +38,10 @@ services:
       - "local-bin:/homedir/.local/bin"
     hostname: toolbox
     ports:
+      # parcel
       - 1234
       - 5000
+      - 33969
 
 volumes:
   tmp:
