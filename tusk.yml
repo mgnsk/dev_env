@@ -58,6 +58,7 @@ tasks:
     run:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
+      - task: _clean-mounts
 
   drop-vols:
     run:

@@ -66,6 +66,7 @@ RUN dnf install --setopt=install_weak_deps=False -y \
 	most \
 	direnv \
 	hadolint \
+	ctags \
 	&& dnf clean all \
 	&& chmod +x /entrypoint.sh
 
