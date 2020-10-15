@@ -36,6 +36,7 @@ services:
       - "python-global:/homedir/.local/lib/python3.8"
       - "cargo-data:/homedir/.cargo"
       - "local-bin:/homedir/.local/bin"
+      - "usr-local-lib:/usr/local/lib"
     hostname: toolbox
     ports:
       # parcel
@@ -58,3 +59,4 @@ volumes:
   python-global:
   cargo-data:
   local-bin:
+  usr-local-lib:
