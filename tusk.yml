@@ -1,17 +1,46 @@
 ---
 options:
-  container_uid:
-    default: 3000
-  container_gid:
-    default: 3000
-  container_user:
-    default: user
-  container_group:
-    default: user
-  upperdir:
-    default: ./code
-
 tasks:
+  bash:
+    options:
+      uid:
+        default: 3000
+      gid:
+        default: 3000
+      user:
+        default: user
+      group:
+        default: user
+      upperdir:
+        default:
+          command: echo "$(pwd)/code"
+      dir:
+        default:
+          command: echo "$(pwd)/.fuse-$(cat /proc/sys/kernel/random/uuid | cut -c-8)"
+      lowerdir:
+        default: ${dir}/lowerdir
+      workdir:
+        default: ${dir}/workdir
+      merged:
+        default: ${dir}/merged
+    run:
+      - command: mkdir -p ${lowerdir} ${workdir} ${merged}
+      - command: >
+          podman
+          unshare
+          fuse-overlayfs
+          -o
+          uidmapping=0:${uid}:1,gidmapping=0:${gid}:1,lowerdir=${lowerdir},upperdir=${upperdir},workdir=${workdir},noxattrs=1,fsync=1,threaded=1
+          ${merged}
+      - set-environment:
+          CODE_DIR: ${merged}
+      - command: podman-compose -p dev-env run --rm --service-ports toolbox /bin/bash
+    finally:
+      - command: podman unshare fusermount3 -u ${merged}
+      - command: rm -rf ${dir}
+      - command: find ${upperdir} -type c -exec rm -f {} \;
+      - command: find ${upperdir} -type f -name ".wh..wh..opq" -exec rm {} \;
+
   build:
     run:
       - command: >
@@ -23,21 +52,11 @@ tasks:
           --build-arg user=${container_user}
           --build-arg group=${container_group}
       - command: podman image prune -f
-
-  bash:
-    usage: Run bash shell as a non-root user.
-    run:
-      - command: >
-          go run toolbox.go bash
-          --uid ${container_uid}
-          --gid ${container_gid}
-          --upperdir ${upperdir}
  
   kill:
     run:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
-      - task: clean-mounts
 
   drop-vols:
     run:
