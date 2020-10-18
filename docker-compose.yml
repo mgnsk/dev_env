@@ -21,7 +21,7 @@ services:
     # - ALL
     mem_limit: 2g
     volumes:
-      - ".mount/code/merged:/code"
+      - "${CODE_DIR}:/code"
       - "tmp:/tmp"
       - "cache:/homedir/.cache"
       - "bash-history:/homedir/.bash_history"

@@ -21,13 +21,13 @@ RUN dnf upgrade -y \
 
 FROM build AS earlyoom
 
-WORKDIR /tmp/earlyoom
+WORKDIR /earlyoom
 
 RUN git clone https://github.com/rfjakob/earlyoom.git . \
 	&& make \
 	&& mv earlyoom /usr/bin/ \
 	&& dnf clean all \
-	&& rm -rf /tmp/earlyoom
+	&& rm -rf /earlyoom
 
 
 FROM build AS rust

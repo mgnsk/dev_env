@@ -8,28 +8,10 @@ options:
     default: user
   container_group:
     default: user
+  upperdir:
+    default: ./code
 
 tasks:
-  _make-user-mounts:
-    private: yes
-    run:
-      - command: mkdir -p code
-      - command: mkdir -p .mount/code/{lowerdir,workdir,merged}
-      - command: podman unshare fuse-overlayfs -o uidmapping=0:${container_uid}:1,gidmapping=0:${container_gid}:1,lowerdir=.mount/code/lowerdir,upperdir=code,workdir=.mount/code/workdir,noxattrs=1,fsync=1,threaded=1 .mount/code/merged
-
-  _make-root-mounts:
-    private: yes
-    run:
-      - command: mkdir -p code
-      - command: mkdir -p .mount/code
-      - command: ln -s $PWD/code $PWD/.mount/code/merged
-
-  clean-mounts:
-    run:
-      - command: rm -rf .mount
-      - command: find ./code -type c -exec rm -f {} \;
-      - command: find ./code -type f -name ".wh..wh..opq" -exec rm {} \;
-
   build:
     run:
       - command: >
@@ -45,17 +27,12 @@ tasks:
   bash:
     usage: Run bash shell as a non-root user.
     run:
-      - task: clean-mounts
-      - task: _make-user-mounts
-      - command: podman-compose -p dev-env run --rm --service-ports toolbox /bin/bash
-
-  root:
-    usage: Run a root shell.
-    run:
-      - task: clean-mounts
-      - task: _make-root-mounts
-      - command: podman-compose -p dev-env run --rm --service-ports --user root toolbox /bin/bash
-
+      - command: >
+          go run toolbox.go bash
+          --uid ${container_uid}
+          --gid ${container_gid}
+          --upperdir ${upperdir}
+ 
   kill:
     run:
       - command: podman pod kill dev-env || true
@@ -64,7 +41,6 @@ tasks:
 
   drop-vols:
     run:
-      - task: clean-mounts
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
 
   drop-image:
