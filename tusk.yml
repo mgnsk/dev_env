@@ -26,10 +26,7 @@ tasks:
     run:
       - command: mkdir -p ${lowerdir} ${workdir} ${merged}
       - command: >
-          podman
-          unshare
-          fuse-overlayfs
-          -o
+          podman unshare fuse-overlayfs -o
           uidmapping=0:${uid}:1,gidmapping=0:${gid}:1,lowerdir=${lowerdir},upperdir=${upperdir},workdir=${workdir},noxattrs=1,fsync=1,threaded=1
           ${merged}
       - set-environment:
@@ -38,8 +35,7 @@ tasks:
     finally:
       - command: podman unshare fusermount3 -u ${merged}
       - command: rm -rf ${dir}
-      - command: find ${upperdir} -type c -exec rm -f {} \;
-      - command: find ${upperdir} -type f -name ".wh..wh..opq" -exec rm {} \;
+      - command: find ${upperdir} \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
 
   build:
     run:
