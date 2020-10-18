@@ -65,7 +65,7 @@ func bashCmd() *cobra.Command {
 				path.Dir(upperdir),
 				fmt.Sprintf(".fuse-%d", rand.Int()),
 			)
-			defer warn(os.RemoveAll(dir))
+			defer os.RemoveAll(dir)
 			defer cleanup(upperdir)
 
 			mount(upperdir, dir, uid, gid)
