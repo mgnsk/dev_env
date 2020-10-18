@@ -1,16 +1,28 @@
 ---
 options:
+  uid:
+    default: 3000
+  gid:
+    default: 3000
+  user:
+    default: user
+  group:
+    default: user
 tasks:
+  build:
+    run:
+      - command: >
+          podman-compose
+          build
+          --pull
+          --build-arg uid=${uid}
+          --build-arg gid=${gid}
+          --build-arg user=${user}
+          --build-arg group=${group}
+      - command: podman image prune -f
+
   bash:
     options:
-      uid:
-        default: 3000
-      gid:
-        default: 3000
-      user:
-        default: user
-      group:
-        default: user
       upperdir:
         default:
           command: echo "$(pwd)/code"
@@ -37,18 +49,6 @@ tasks:
       - command: rm -rf ${dir}
       - command: find ${upperdir} \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
 
-  build:
-    run:
-      - command: >
-          podman-compose
-          build
-          --pull
-          --build-arg uid=${container_uid}
-          --build-arg gid=${container_gid}
-          --build-arg user=${container_user}
-          --build-arg group=${container_group}
-      - command: podman image prune -f
- 
   kill:
     run:
       - command: podman pod kill dev-env || true
