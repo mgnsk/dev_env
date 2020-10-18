@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -16,16 +14,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func check(err error) {
-	if err == nil {
-		return
-	}
-	var errExit *exec.ExitError
-	if errors.As(err, &errExit) {
-		log.Println(err)
-		os.Exit(errExit.ExitCode())
-	} else {
+func fatal(err error) {
+	if err != nil {
 		panic(err)
+	}
+}
+
+func warn(err error) {
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -47,7 +44,7 @@ func main() {
 	}
 
 	root.AddCommand(bashCmd())
-	check(root.Execute())
+	fatal(root.Execute())
 }
 
 func bashCmd() *cobra.Command {
@@ -56,25 +53,25 @@ func bashCmd() *cobra.Command {
 		Short: "run a bash shell",
 		Run: func(cmd *cobra.Command, args []string) {
 			upperdir, err := cmd.Flags().GetString("upperdir")
-			check(err)
+			fatal(err)
 
 			uid, err := cmd.Flags().GetString("uid")
-			check(err)
+			fatal(err)
 
 			gid, err := cmd.Flags().GetString("gid")
-			check(err)
+			fatal(err)
 
 			dir := filepath.Join(
 				path.Dir(upperdir),
 				fmt.Sprintf(".fuse-%d", rand.Int()),
 			)
-			defer os.RemoveAll(dir)
+			defer warn(os.RemoveAll(dir))
 			defer cleanup(upperdir)
 
-			check(mount(upperdir, dir, uid, gid))
+			mount(upperdir, dir, uid, gid)
 			defer unmount(dir)
 
-			check(runContainer(filepath.Join(dir, "merged")))
+			runContainer(filepath.Join(dir, "merged"))
 		},
 	}
 
@@ -90,15 +87,15 @@ func bashCmd() *cobra.Command {
 	return cmd
 }
 
-func mount(upperdir, dir, containerUID, containerGID string) error {
+func mount(upperdir, dir, containerUID, containerGID string) {
 	lowerdir := filepath.Join(dir, "lowerdir")
-	check(os.MkdirAll(lowerdir, 0o755))
+	fatal(os.MkdirAll(lowerdir, 0o755))
 
 	workdir := filepath.Join(dir, "workdir")
-	check(os.MkdirAll(workdir, 0o755))
+	fatal(os.MkdirAll(workdir, 0o755))
 
 	mountpoint := filepath.Join(dir, "merged")
-	check(os.MkdirAll(mountpoint, 0o755))
+	fatal(os.MkdirAll(mountpoint, 0o755))
 
 	cmd := exec.Command(
 		"podman",
@@ -118,14 +115,7 @@ func mount(upperdir, dir, containerUID, containerGID string) error {
 		mountpoint,
 	)
 
-	var b bytes.Buffer
-	cmd.Stderr = &b
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("error mounting FUSE: %s: %w", b.String(), err)
-	}
-
-	return nil
+	fatal(cmd.Run())
 }
 
 func unmount(dir string) {
@@ -136,28 +126,26 @@ func unmount(dir string) {
 		if err == nil {
 			return
 		}
-		log.Println(fmt.Errorf("error unmounting FUSE: %w", err))
+		warn(fmt.Errorf("error unmounting FUSE: %w", err))
 	}
 }
 
 func cleanup(upperdir string) {
-	if err := filepath.Walk(upperdir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(upperdir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if (info.Mode()&os.ModeCharDevice) != 0 || info.Name() == ".wh..wh..opq" {
-			if err := os.Remove(path); err != nil {
-				log.Println(err)
-			}
+			warn(os.Remove(path))
 		}
 		return nil
-	}); err != nil {
-		log.Println(err)
-	}
+	})
+
+	warn(err)
 }
 
-func runContainer(codeDir string) error {
+func runContainer(codeDir string) {
 	cmd := exec.Command(
 		"podman-compose",
 		"-p",
@@ -177,5 +165,5 @@ func runContainer(codeDir string) error {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
-	return cmd.Run()
+	fatal(cmd.Run())
 }
