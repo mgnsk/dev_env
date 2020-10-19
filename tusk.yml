@@ -8,6 +8,9 @@ options:
     default: user
   group:
     default: user
+  upperdir:
+    default:
+      command: echo "$(pwd)/code"
 tasks:
   build:
     run:
@@ -23,9 +26,6 @@ tasks:
 
   bash:
     options:
-      upperdir:
-        default:
-          command: echo "$(pwd)/code"
       dir:
         default:
           command: echo "$(pwd)/.fuse-$(cat /proc/sys/kernel/random/uuid | cut -c-8)"
@@ -48,6 +48,12 @@ tasks:
       - command: podman unshare fusermount3 -u ${merged}
       - command: rm -rf ${dir}
       - command: find ${upperdir} \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
+
+  root:
+    run:
+      - set-environment:
+          CODE_DIR: ${upperdir}
+      - command: podman-compose -p dev-env run --rm --service-ports --user root toolbox /bin/bash
 
   kill:
     run:
