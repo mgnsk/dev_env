@@ -33,10 +33,9 @@ services:
       - "composer-global:/homedir/.composer"
       - "npm-global:/homedir/.npm-global"
       - "go-global:/homedir/go"
-      - "python-global:/homedir/.local/lib/python3.8"
       - "cargo-data:/homedir/.cargo"
       - "local-bin:/homedir/.local/bin"
-      - "usr-local-lib:/usr/local/lib"
+      - "local-lib:/homedir/.local/lib"
     hostname: toolbox
     ports:
       # parcel
@@ -56,7 +55,6 @@ volumes:
   composer-global:
   npm-global:
   go-global:
-  python-global:
   cargo-data:
   local-bin:
-  usr-local-lib:
+  local-lib:
