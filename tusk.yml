@@ -13,6 +13,7 @@ options:
       command: echo "$(pwd)/code"
 tasks:
   build:
+    usage: Build the toolbox and toolbox-base images.
     run:
       - command: >
           podman-compose
@@ -25,28 +26,18 @@ tasks:
       - command: podman image prune -f
 
   bash:
+    usage: Run a bash shell as the container UID in user namespace while mounting a shifted view of the filesystem.
     options:
-      dir:
+      tmp:
         default:
-          command: echo "$(pwd)/.fuse-$(cat /proc/sys/kernel/random/uuid | cut -c-8)"
-      lowerdir:
-        default: ${dir}/lowerdir
-      workdir:
-        default: ${dir}/workdir
-      merged:
-        default: ${dir}/merged
+          command: ./mount.sh ${uid} ${gid} ${upperdir}
     run:
-      - command: mkdir -p ${lowerdir} ${workdir} ${merged}
-      - command: >
-          podman unshare fuse-overlayfs -o
-          uidmapping=0:${uid}:1,gidmapping=0:${gid}:1,lowerdir=${lowerdir},upperdir=${upperdir},workdir=${workdir},noxattrs=1,fsync=1,threaded=1
-          ${merged}
       - set-environment:
-          CODE_DIR: ${merged}
+          CODE_DIR: ${tmp}/merged
       - command: podman-compose -p dev-env run --rm --service-ports toolbox /bin/bash
     finally:
-      - command: podman unshare fusermount3 -u ${merged}
-      - command: rm -rf ${dir}
+      - command: podman unshare fusermount3 -u ${tmp}/merged
+      - command: rm -rf ${tmp}
       - command: find ${upperdir} \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
 
   root:
@@ -55,22 +46,8 @@ tasks:
           CODE_DIR: ${upperdir}
       - command: podman-compose -p dev-env run --rm --service-ports --user root toolbox /bin/bash
 
-  kill:
+  clean:
     run:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
-
-  drop-vols:
-    run:
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
-
-  drop-image:
-    run:
-      - command: podman rmi mgnsk/toolbox || true
-      - command: podman rmi mgnsk/toolbox-base || true
-
-  destroy:
-    run:
-      - task: kill
-      - task: drop-vols
-      - task: drop-image
