@@ -13,7 +13,7 @@ options:
       command: echo "$(pwd)/code"
 tasks:
   build:
-    usage: Build the toolbox and toolbox-base images.
+    usage: Build the toolbox-base and toolbox images.
     run:
       - command: >
           podman-compose
