@@ -9,6 +9,10 @@ RUN dnf upgrade -y \
 	&& dnf groupinstall -y "C Development Tools and Libraries" \
 	&& dnf install --setopt=install_weak_deps=False -y \
 	git \
+	cmake \
+	unzip \
+	gettext \
+	&& dnf clean all \
 	&& groupadd -g ${gid} ${group} \
 	&& useradd \
 	--home-dir /homedir \
@@ -19,6 +23,17 @@ RUN dnf upgrade -y \
 	&& ln -s /homedir /root
 
 
+FROM build AS neovim
+
+WORKDIR /neovim
+
+RUN git clone https://github.com/neovim/neovim . \
+	&& git checkout b6897ebc0c623d0a74c221c3030c7eaf17b7e151 \
+	&& make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=/homedir/neovim" \
+	&& make install \
+	&& rm -rf /neovim
+
+
 FROM build AS earlyoom
 
 WORKDIR /earlyoom
@@ -26,14 +41,12 @@ WORKDIR /earlyoom
 RUN git clone https://github.com/rfjakob/earlyoom.git . \
 	&& make \
 	&& mv earlyoom /usr/bin/ \
-	&& dnf clean all \
 	&& rm -rf /earlyoom
 
 
 FROM build AS rust
 
-RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y" \
-	&& dnf clean all
+RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 
 
 FROM build
@@ -45,14 +58,13 @@ COPY ./entrypoint.sh /entrypoint.sh
 COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
 COPY --chown=${user}:${group} --from=rust /homedir/.cargo /homedir/.cargo
 COPY --chown=${user}:${group} --from=rust /homedir/.rustup /homedir/.rustup
+COPY --chown=${user}:${group} --from=neovim /homedir/neovim /homedir/neovim
 
 RUN dnf install --setopt=install_weak_deps=False -y \
 	bind-utils \
 	diffutils \
 	tmux \
 	tree \
-	neovim \
-	luajit \
 	ShellCheck \
 	tidy \
 	rubygems \
