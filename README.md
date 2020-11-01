@@ -1,6 +1,4 @@
-### Immutable development image
-
-This image serves the purpose of documenting my default environment.
+### Immutable development environment
 
 Dependencies:
 
@@ -9,8 +7,12 @@ Dependencies:
 * `podman-compose`
 * `fuse-overlayfs`
 
-Build and run:
+Build the toolbox:
 
 `$ tusk build`
 
-`$ tusk bash`
+Create and run a workspace:
+
+`$ mkdir workspaces/project1`
+
+`$ tusk bash workspaces/project1`

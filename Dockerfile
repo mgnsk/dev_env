@@ -20,4 +20,4 @@ RUN bash ~/setup.sh \
 	~/.npm-global \
 	~/go
 
-WORKDIR /code
+WORKDIR /workspace

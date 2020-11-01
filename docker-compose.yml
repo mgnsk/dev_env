@@ -21,7 +21,7 @@ services:
     # - ALL
     mem_limit: 2g
     volumes:
-      - "${CODE_DIR}:/code"
+      - "${WORKSPACE_ROOT}:/workspace"
       - "tmp:/tmp"
       - "cache:/homedir/.cache"
       - "bash-history:/homedir/.bash_history"
