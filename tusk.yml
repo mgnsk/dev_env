@@ -8,6 +8,8 @@ options:
     default: user
   group:
     default: user
+  neovim_commit:
+    default: d17e508796be60eefe4a597df62de1fd9e7e1725
 tasks:
   build:
     usage: Build the toolbox-base and toolbox images.
@@ -20,6 +22,7 @@ tasks:
           --build-arg gid=${gid}
           --build-arg user=${user}
           --build-arg group=${group}
+          --build-arg neovim_commit=${neovim_commit}
       - command: podman image prune -f
 
   bash:

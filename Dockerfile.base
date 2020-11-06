@@ -12,6 +12,7 @@ RUN dnf upgrade -y \
 	cmake \
 	unzip \
 	gettext \
+	wget \
 	&& dnf clean all \
 	&& groupadd -g ${gid} ${group} \
 	&& useradd \
@@ -25,10 +26,13 @@ RUN dnf upgrade -y \
 
 FROM build AS neovim
 
+ARG neovim_commit
+
 WORKDIR /neovim
 
-RUN git clone https://github.com/neovim/neovim . \
-	&& git checkout b6897ebc0c623d0a74c221c3030c7eaf17b7e151 \
+RUN wget https://github.com/neovim/neovim/archive/${neovim_commit}.zip \
+	&& unzip -q ${neovim_commit}.zip \
+	&& cd neovim-${neovim_commit} \
 	&& make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=/homedir/neovim" \
 	&& make install \
 	&& rm -rf /neovim
@@ -56,14 +60,15 @@ ARG group
 
 COPY ./entrypoint.sh /entrypoint.sh
 COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
-COPY --chown=${user}:${group} --from=rust /homedir/.cargo /homedir/.cargo
-COPY --chown=${user}:${group} --from=rust /homedir/.rustup /homedir/.rustup
-COPY --chown=${user}:${group} --from=neovim /homedir/neovim /homedir/neovim
+COPY --from=neovim /homedir/neovim /homedir/neovim
+COPY --from=rust --chown=${user}:${group} /homedir/.cargo /homedir/.cargo
+COPY --from=rust --chown=${user}:${group} /homedir/.rustup /homedir/.rustup
 
 RUN dnf install --setopt=install_weak_deps=False -y \
 	bind-utils \
 	diffutils \
 	tmux \
+	procps \
 	tree \
 	ShellCheck \
 	tidy \
@@ -83,9 +88,5 @@ RUN dnf install --setopt=install_weak_deps=False -y \
 	brotli \
 	&& dnf clean all \
 	&& chmod +x /entrypoint.sh
-
-USER ${user}
-
-ENV USER=${user}
 
 ENTRYPOINT ["/entrypoint.sh"]

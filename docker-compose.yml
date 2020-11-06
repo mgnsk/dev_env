@@ -24,10 +24,7 @@ services:
       - "${WORKSPACE_ROOT}:/workspace"
       - "tmp:/tmp"
       - "cache:/homedir/.cache"
-      - "bash-history:/homedir/.bash_history"
       - "nvim-data:/homedir/.local/share/nvim"
-      - "coc-clangd-data:/homedir/.config/coc/extensions/coc-clangd-data"
-      - "coc-phpls-data:/homedir/.config/coc/extensions/coc-phpls-data"
       - "direnv-data:/homedir/.local/share/direnv"
       - "tmux-resurrect:/homedir/.tmux/resurrect"
       - "composer-global:/homedir/.composer"
@@ -36,6 +33,7 @@ services:
       - "cargo-data:/homedir/.cargo"
       - "local-bin:/homedir/.local/bin"
       - "local-lib:/homedir/.local/lib"
+      - "bash-history:/homedir/.bash_history"
     hostname: toolbox
     ports:
       # parcel
