@@ -10,6 +10,10 @@ options:
     default: user
   neovim_commit:
     default: d17e508796be60eefe4a597df62de1fd9e7e1725
+  fuse_flags:
+    # These flags only apply to the custom bind mount.
+    # Container storage options can be configured in ~/.config/containers/storage.conf
+    default: noxattrs=1,fsync=0,threaded=0
 tasks:
   build:
     usage: Build the toolbox-base and toolbox images.
@@ -34,7 +38,7 @@ tasks:
       tmp:
         private: yes
         default:
-          command: podman unshare ./mount.sh ${uid} ${gid} ${workspace}
+          command: podman unshare ./mount.sh ${uid} ${gid} ${fuse_flags} ${workspace}
     run:
       - set-environment:
           WORKSPACE_ROOT: ${tmp}/merged
@@ -49,9 +53,14 @@ tasks:
     args:
       workspace:
         usage: The workspace directory to run in.
+    options:
+      tmp:
+        private: yes
+        default:
+          command: realpath ${workspace}
     run:
       - set-environment:
-          WORKSPACE_ROOT: ${workspace}
+          WORKSPACE_ROOT: ${tmp}
       - command: podman-compose -p dev-env run --rm --service-ports --user root toolbox /bin/bash
 
   clean:

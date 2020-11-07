@@ -38,16 +38,6 @@ RUN wget https://github.com/neovim/neovim/archive/${neovim_commit}.zip \
 	&& rm -rf /neovim
 
 
-FROM build AS earlyoom
-
-WORKDIR /earlyoom
-
-RUN git clone https://github.com/rfjakob/earlyoom.git . \
-	&& make \
-	&& mv earlyoom /usr/bin/ \
-	&& rm -rf /earlyoom
-
-
 FROM build AS rust
 
 RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
@@ -59,7 +49,6 @@ ARG user
 ARG group
 
 COPY ./entrypoint.sh /entrypoint.sh
-COPY --from=earlyoom /usr/bin/earlyoom /usr/bin/earlyoom
 COPY --from=neovim /homedir/neovim /homedir/neovim
 COPY --from=rust --chown=${user}:${group} /homedir/.cargo /homedir/.cargo
 COPY --from=rust --chown=${user}:${group} /homedir/.rustup /homedir/.rustup
@@ -69,6 +58,7 @@ RUN dnf install --setopt=install_weak_deps=False -y \
 	diffutils \
 	tmux \
 	procps \
+	earlyoom \
 	tree \
 	ShellCheck \
 	tidy \
