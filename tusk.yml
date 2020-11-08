@@ -29,6 +29,7 @@ tasks:
           --build-arg neovim_commit=${neovim_commit}
       - command: podman image prune -f
 
+
   bash:
     usage: Run a bash shell as the container UID in user namespace while mounting a shifted view of the filesystem.
     args:
@@ -39,15 +40,16 @@ tasks:
         private: yes
         default:
           command: podman unshare ./mount.sh ${uid} ${gid} ${fuse_flags} ${workspace}
+      starttime:
+        default:
+          command: date
     run:
       - set-environment:
           WORKSPACE_ROOT: ${tmp}/merged
       - command: podman-compose -p dev-env run --rm --service-ports toolbox /bin/bash
     finally:
-      - command: podman unshare fusermount3 -u ${tmp}/merged
-      - command: rm -rf ${tmp}
-      # TODO
-      - command: find ${workspace} \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
+      - command: podman unshare ./unmount.sh ${tmp}
+      - command: find ${workspace} -newermt "${starttime}" \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
 
   root:
     args:
@@ -68,3 +70,4 @@ tasks:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
+      - command: for d in .fuse-*; do podman unshare ./unmount.sh $d; done
