@@ -9,11 +9,9 @@ options:
   group:
     default: user
   neovim_commit:
+    private: true
     default: d17e508796be60eefe4a597df62de1fd9e7e1725
-  fuse_flags:
-    # These flags only apply to the custom bind mount.
-    # Container storage options can be configured in ~/.config/containers/storage.conf
-    default: noxattrs=1,fsync=0,threaded=0
+
 tasks:
   build:
     usage: Build the toolbox-base and toolbox images.
@@ -29,7 +27,6 @@ tasks:
           --build-arg neovim_commit=${neovim_commit}
       - command: podman image prune -f
 
-
   bash:
     usage: Run a bash shell as the container UID in user namespace while mounting a shifted view of the filesystem.
     args:
@@ -37,18 +34,35 @@ tasks:
         usage: The workspace directory to run in.
     options:
       tmp:
-        private: yes
+        private: true
         default:
-          command: podman unshare ./mount.sh ${uid} ${gid} ${fuse_flags} ${workspace}
+          command: bash -c "echo $(pwd)/.fuse-$(cat /proc/sys/kernel/random/uuid | cut -c-8)"
+      upperdir:
+        private: true
+        default:
+          command: realpath ${workspace}
       starttime:
+        private: true
         default:
           command: date
     run:
+      - command: |
+          if [ "$(pwd)" == "${upperdir}" ]; then echo "invalid workspace: ${upperdir}"; exit 1; fi
+      - task:
+          name: _mount
+          options:
+            uid: ${uid}
+            gid: ${gid}
+            upperdir: ${upperdir}
+            tmp: ${tmp}
       - set-environment:
           WORKSPACE_ROOT: ${tmp}/merged
       - command: podman-compose -p dev-env run --rm --service-ports toolbox /bin/bash
     finally:
-      - command: podman unshare ./unmount.sh ${tmp}
+      - task:
+          name: _unmount
+          options:
+            tmp: ${tmp}
       - command: find ${workspace} -newermt "${starttime}" \( -type c -or \( -type f -and -name ".wh..wh..opq" \) \) -delete
 
   root:
@@ -70,4 +84,13 @@ tasks:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
-      - command: for d in $(ls -d1 .fuse-*); do podman unshare ./unmount.sh $d; done
+      - task:
+          name: _unmount
+          options:
+            tmp: .fuse-*
+
+  _mount:
+    include: cmd/mount.yml
+
+  _unmount:
+    include: cmd/unmount.yml
