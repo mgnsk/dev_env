@@ -70,4 +70,4 @@ tasks:
       - command: podman pod kill dev-env || true
       - command: podman pod rm dev-env || true
       - command: for v in $(podman volume ls | awk 'NR>1 {print $2}' | grep "^dev-env"); do podman volume rm $v; done
-      - command: for d in .fuse-*; do podman unshare ./unmount.sh $d; done
+      - command: for d in $(ls -d1 .fuse-*); do podman unshare ./unmount.sh $d; done
