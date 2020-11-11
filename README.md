@@ -17,7 +17,7 @@ Create and run a workspace:
 
 `$ tusk bash workspaces/project1`
 
-#### Visual Studio Code Remote - Containers.
+#### Visual Studio Code Remote - Containers
 Install `podman-docker` to simulate the docker API.
 
 Attach to a running toolbox container and open `/workspace`.
