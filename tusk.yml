@@ -10,7 +10,7 @@ options:
     default: user
   neovim_commit:
     private: true
-    default: d17e508796be60eefe4a597df62de1fd9e7e1725
+    default: 0a95549d66df63c06d775fcc329f7b63cbb46b2f
 
 tasks:
   build:
