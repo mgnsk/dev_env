@@ -14,7 +14,6 @@ RUN dnf upgrade -y \
 	unzip \
 	gettext \
 	wget \
-	&& dnf clean all \
 	&& groupadd -g ${gid} ${group} \
 	&& useradd \
 	--home-dir /homedir \
@@ -27,19 +26,26 @@ RUN dnf upgrade -y \
 
 FROM build AS neovim
 
+ARG user
 ARG neovim_commit
 
-WORKDIR /neovim
+USER ${user}
+
+WORKDIR /homedir
 
 RUN wget https://github.com/neovim/neovim/archive/${neovim_commit}.zip \
 	&& unzip -q ${neovim_commit}.zip \
 	&& cd neovim-${neovim_commit} \
 	&& make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=/homedir/neovim" \
 	&& make install \
-	&& rm -rf /neovim
+	&& rm -rf /homedir/neovim-${neovim_commit}
 
 
 FROM build AS rust
+
+ARG user
+
+USER ${user}
 
 RUN bash -c "set -e; curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
 
@@ -58,6 +64,7 @@ RUN dnf install --setopt=install_weak_deps=False -y \
 	bind-utils \
 	diffutils \
 	tmux \
+	bash-completion \
 	procps \
 	earlyoom \
 	tree \
@@ -65,10 +72,13 @@ RUN dnf install --setopt=install_weak_deps=False -y \
 	tidy \
 	rubygems \
 	perl \
+	ansible \
 	python-pip \
 	python-devel \
 	clang-tools-extra \
 	npm \
+	lua-devel \
+	luarocks \
 	go \
 	ripgrep \
 	most \
