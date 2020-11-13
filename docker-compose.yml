@@ -1,22 +1,29 @@
 ---
-version: "2.4"
+version: "3.4"
 services:
   base:
-    image: mgnsk/toolbox-base:latest
+    image: github.com/mgnsk/toolbox/base:latest
     build:
       context: .
       dockerfile: Dockerfile.base
+      target: base
       args:
         - uid
         - gid
+        - user
+        - group
+        - neovim_commit
 
   toolbox:
-    image: mgnsk/toolbox:latest
+    image: github.com/mgnsk/toolbox/toolbox:latest
     depends_on:
       - base
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - user
+        - group
     # cap_drop:
     # - ALL
     mem_limit: 2g

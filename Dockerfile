@@ -1,11 +1,7 @@
-FROM mgnsk/toolbox-base:latest
+FROM github.com/mgnsk/toolbox/base
 
 ARG user
 ARG group
-
-USER ${user}
-
-ENV USER=${user}
 
 COPY --chown=${user}:${group} /dotfiles /homedir
 
